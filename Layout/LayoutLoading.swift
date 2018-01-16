@@ -4,15 +4,15 @@ import UIKit
 
 /// Protocol for views or view controllers that can load and display a LayoutNode
 public protocol LayoutLoading: LayoutDelegate {
-
+    
     /// The loaded LayoutNode instance
     /// A default implementation of this property is provided for UIView and UIViewControllers
     var layoutNode: LayoutNode? { get set }
-
+    
     /// Called immediately after the layoutNode is set. Will not be called
     /// in the event of an error, or if layoutNode is set to nil
     func layoutDidLoad(_ layoutNode: LayoutNode)
-
+    
     /// Fetch a localized string constant for a given key.
     /// These strings are assumed to be constant for the duration of the layout tree's lifecycle
     /// The default implementation dynamically loads the string from the Localizable.strings file
@@ -20,44 +20,48 @@ public protocol LayoutLoading: LayoutDelegate {
 }
 
 public extension LayoutLoading {
-
+    
     /// Load a named Layout xml file from a local resource bundle
     func loadLayout(
         named: String? = nil,
         bundle: Bundle = Bundle.main,
         relativeTo: String = #file,
         state: Any = (),
+        subStates: [String: Any] = [:],
         constants: [String: Any]...
-    ) {
+        ) {
         assert(Thread.isMainThread)
         let name = named ?? "\(type(of: self))".components(separatedBy: ".").last!
         guard let xmlURL = bundle.url(forResource: name, withExtension: nil) ??
             bundle.url(forResource: name, withExtension: "xml") else {
-            layoutError(.message("No layout XML file found for \(name)"))
-            return
+                layoutError(.message("No layout XML file found for \(name)"))
+                return
         }
         loadLayout(
             withContentsOfURL: xmlURL,
             relativeTo: relativeTo,
             state: state,
+            subStates: subStates,
             constants: merge(constants),
             completion: nil
         )
     }
-
+    
     /// Load a local or remote xml file via its URL
     func loadLayout(
         withContentsOfURL xmlURL: URL,
         relativeTo: String? = #file,
         state: Any = (),
+        subStates: [String: Any] = [:],
         constants: [String: Any]...,
         completion: ((LayoutError?) -> Void)? = nil
-    ) {
+        ) {
         ReloadManager.addObserver(self)
         loader.loadLayoutNode(
             withContentsOfURL: xmlURL,
             relativeTo: relativeTo,
             state: state,
+            subStates: subStates,
             constants: merge(constants)
         ) { layoutNode, error in
             if let layoutNode = layoutNode {
@@ -69,7 +73,7 @@ public extension LayoutLoading {
             completion?(error)
         }
     }
-
+    
     /// Reload the previously loaded xml file
     func reloadLayout(withCompletion completion: ((LayoutError?) -> Void)? = nil) {
         loader.reloadLayoutNode { layoutNode, error in
@@ -82,7 +86,7 @@ public extension LayoutLoading {
             completion?(error)
         }
     }
-
+    
     // Used by LayoutLoading protocol
     internal var loader: LayoutLoader {
         guard let loader = objc_getAssociatedObject(self, &loaderKey) as? LayoutLoader else {
@@ -95,7 +99,7 @@ public extension LayoutLoading {
 }
 
 public extension LayoutLoading where Self: UIView {
-
+    
     /// Default layoutNode implementation for views
     var layoutNode: LayoutNode? {
         get {
@@ -118,7 +122,7 @@ public extension LayoutLoading where Self: UIView {
 }
 
 public extension LayoutLoading where Self: UIViewController {
-
+    
     /// Default layoutNode implementation for view controllers
     var layoutNode: LayoutNode? {
         get {
@@ -141,10 +145,10 @@ public extension LayoutLoading where Self: UIViewController {
 }
 
 public extension LayoutLoading {
-
+    
     /// Default layoutDidLoad(_:) implementation - does nothing
     public func layoutDidLoad(_: LayoutNode) {}
-
+    
     /// Default layoutString implementation - bubbles request up to the first responder
     /// that will handle it, or dynamically loads localized string  from Localizable.strings
     /// file in the local resources if no overridden implementation is found
@@ -169,3 +173,4 @@ public extension LayoutLoading {
 
 private var layoutNodeKey = 1
 private var loaderKey = 1
+

@@ -3,30 +3,33 @@
 import Foundation
 
 extension LayoutNode {
-
+    
     /// Create a new LayoutNode instance from a Layout template
     convenience init(
         layout: Layout,
         outlet: String? = nil,
         state: Any = (),
+        subStates: [String: Any] = [:],
         constants: [String: Any]...
-    ) throws {
+        ) throws {
         try self.init(
             layout: layout,
             outlet: outlet,
             state: state,
+            subStates: subStates,
             constants: merge(constants),
             isRoot: true
         )
     }
-
+    
     private convenience init(
         layout: Layout,
         outlet: String? = nil,
         state: Any = (),
+        subStates: [String: Any] = [:],
         constants: [String: Any] = [:],
         isRoot: Bool
-    ) throws {
+        ) throws {
         do {
             if let path = layout.templatePath {
                 throw LayoutError("Cannot initialize \(layout.className) node until content for \(path) has been loaded")
@@ -49,7 +52,10 @@ extension LayoutNode {
                 constants: constants,
                 expressions: expressions,
                 children: layout.children.map {
-                    try LayoutNode(layout: $0, isRoot: false)
+                    try LayoutNode(layout: $0,
+                                   state: ($0.id != nil ? subStates[$0.id!] ?? () : ()),
+                                   subStates: subStates,
+                                   isRoot: false)
                 }
             )
             _parameters = layout.parameters
@@ -84,7 +90,7 @@ extension LayoutNode {
 }
 
 extension Layout {
-
+    
     // Experimental - extracts a layout template from an existing node
     // TODO: this isn't a lossless conversion - find a better approach
     init(_ node: LayoutNode) {
@@ -103,3 +109,4 @@ extension Layout {
         )
     }
 }
+

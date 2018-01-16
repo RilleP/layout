@@ -10,7 +10,7 @@ private let queue = DispatchQueue(label: "com.Layout.LayoutLoader")
 private var reloadLock = 0
 
 private extension Layout {
-
+    
     /// Merges the contents of the specified layout into this one
     /// Will fail if the layout class is not a subclass of this one
     func merged(with layout: Layout) throws -> Layout {
@@ -48,7 +48,7 @@ private extension Layout {
             rootURL: rootURL
         )
     }
-
+    
     /// Recursively load all nested layout templates
     func processTemplates(completion: @escaping (Layout?, LayoutError?) -> Void) {
         var result = self
@@ -100,9 +100,10 @@ class LayoutLoader {
     private var _projectDirectory: URL?
     private var _dataTask: URLSessionDataTask?
     private var _state: Any = ()
+    private var _subStates: [String: Any] = [:]
     private var _constants: [String: Any] = [:]
     private var _strings: [String: String]?
-
+    
     /// Used for protecting operations that must not be interupted by a reload.
     /// Any reload attempts that happen inside the block will be ignored
     static func atomic<T>(_ protected: () throws -> T) rethrows -> T {
@@ -110,20 +111,22 @@ class LayoutLoader {
         defer { queue.sync { reloadLock -= 1 } }
         return try protected()
     }
-
+    
     // MARK: LayoutNode loading
-
+    
     /// Loads a named XML layout file from the app resources folder
     public func loadLayoutNode(
         named: String,
         bundle: Bundle = Bundle.main,
         relativeTo: String = #file,
         state: Any = (),
+        subStates: [String: Any] = [:],
         constants: [String: Any] = [:]
-    ) throws -> LayoutNode {
+        ) throws -> LayoutNode {
         _state = state
         _constants = constants
-
+        _subStates = subStates;
+        
         let layout = try loadLayout(
             named: named,
             bundle: bundle,
@@ -132,26 +135,30 @@ class LayoutLoader {
         return try LayoutNode(
             layout: layout,
             state: state,
+            subStates: subStates,
             constants: constants
         )
     }
-
+    
     /// Loads a local or remote XML layout file with the specified URL
     public func loadLayoutNode(
         withContentsOfURL xmlURL: URL,
         relativeTo: String? = #file,
         state: Any = (),
+        subStates: [String: Any] = [:],
         constants: [String: Any] = [:],
         completion: @escaping LayoutLoaderCallback
-    ) {
+        ) {
         _state = state
+        _subStates = subStates
         _constants = constants
-
+        
         loadLayout(
             withContentsOfURL: xmlURL,
             relativeTo: relativeTo,
             completion: { [weak self] layout, error in
                 self?._state = state
+                self?._subStates = subStates
                 self?._constants = constants
                 do {
                     guard let layout = layout else {
@@ -163,6 +170,7 @@ class LayoutLoader {
                     try completion(LayoutNode(
                         layout: layout,
                         state: state,
+                        subStates: subStates,
                         constants: constants
                     ), nil)
                 } catch {
@@ -171,7 +179,7 @@ class LayoutLoader {
             }
         )
     }
-
+    
     /// Reloads the most recently loaded XML layout file
     public func reloadLayoutNode(withCompletion completion: @escaping LayoutLoaderCallback) {
         guard let xmlURL = _originalURL, _dataTask == nil, queue.sync(execute: {
@@ -186,22 +194,23 @@ class LayoutLoader {
             withContentsOfURL: xmlURL,
             relativeTo: nil,
             state: _state,
+            subStates: _subStates,
             constants: _constants,
             completion: completion
         )
     }
-
+    
     // MARK: Layout loading
-
+    
     public func loadLayout(
         named: String,
         bundle: Bundle = Bundle.main,
         relativeTo: String = #file
-    ) throws -> Layout {
+        ) throws -> Layout {
         assert(Thread.isMainThread)
         guard let xmlURL = bundle.url(forResource: named, withExtension: nil) ??
             bundle.url(forResource: named, withExtension: "xml") else {
-            throw LayoutError.message("No layout XML file found for \(named)")
+                throw LayoutError.message("No layout XML file found for \(named)")
         }
         var _layout: Layout?
         var _error: Error?
@@ -220,18 +229,18 @@ class LayoutLoader {
         }
         return layout
     }
-
+    
     public func loadLayout(
         withContentsOfURL xmlURL: URL,
         relativeTo: String? = #file,
         completion: @escaping (Layout?, LayoutError?) -> Void
-    ) {
+        ) {
         _dataTask?.cancel()
         _dataTask = nil
         _originalURL = xmlURL
         _xmlURL = xmlURL
         _strings = nil
-
+        
         func processLayoutData(_ data: Data) throws {
             assert(Thread.isMainThread) // TODO: can we parse XML in the background instead?
             do {
@@ -242,7 +251,7 @@ class LayoutLoader {
                 throw LayoutError(error, in: xmlURL.lastPathComponent)
             }
         }
-
+        
         // If it's a bundle resource url, replace with equivalent source url
         if xmlURL.isFileURL {
             let bundlePath = Bundle.main.bundleURL.absoluteString
@@ -270,7 +279,7 @@ class LayoutLoader {
                 }
             }
         }
-
+        
         // Check cache
         var layout: Layout?
         queue.sync { layout = cache[_xmlURL] }
@@ -278,7 +287,7 @@ class LayoutLoader {
             layout.processTemplates(completion: completion)
             return
         }
-
+        
         // Load synchronously if it's a local file and we're on the main thread already
         if _xmlURL.isFileURL, Thread.isMainThread {
             do {
@@ -289,7 +298,7 @@ class LayoutLoader {
             }
             return
         }
-
+        
         // Load asynchronously
         let xmlURL = _xmlURL!
         _dataTask = URLSession.shared.dataTask(with: xmlURL) { data, _, error in
@@ -313,9 +322,9 @@ class LayoutLoader {
         }
         _dataTask?.resume()
     }
-
+    
     // MARK: String loading
-
+    
     public func loadLocalizedStrings() throws -> [String: String] {
         if let strings = _strings {
             return strings
@@ -336,50 +345,50 @@ class LayoutLoader {
         }
         return [:]
     }
-
+    
     // MARK: Internal APIs exposed for LayoutConsole
-
+    
     func setSourceURL(_ sourceURL: URL, for path: String) {
         _setSourceURL(sourceURL, for: path)
     }
-
+    
     func clearSourceURLs() {
         _clearSourceURLs()
     }
-
+    
     // MARK: Internal APIs exposed for testing
-
+    
     func findProjectDirectory(at path: String) -> URL? {
         return _findProjectDirectory(at: path)
     }
-
+    
     func findSourceURL(
         forRelativePath path: String,
         in directory: URL,
         ignoring: [URL] = [],
         usingCache: Bool = true
-    ) throws -> URL {
+        ) throws -> URL {
         guard let url = try _findSourceURL(
             forRelativePath: path,
             in: directory,
             ignoring: ignoring,
             usingCache: usingCache
-        ) else {
-            throw LayoutError.message("Unable to locate source file for \(path)")
+            ) else {
+                throw LayoutError.message("Unable to locate source file for \(path)")
         }
         return url
     }
 }
 
 #if arch(i386) || arch(x86_64)
-
+    
     // MARK: Only applicable when running in the simulator
-
+    
     private var layoutSettings: [String: Any] {
         get { return UserDefaults.standard.dictionary(forKey: "com.Layout") ?? [:] }
         set { UserDefaults.standard.set(newValue, forKey: "com.Layout") }
-    }
-
+}
+    
     private var _projectDirectory: URL? {
         didSet {
             let path = _projectDirectory?.path
@@ -388,25 +397,25 @@ class LayoutLoader {
                 layoutSettings["projectDirectory"] = path
             }
         }
-    }
-
+}
+    
     private var _sourcePaths: [String: String] = {
         layoutSettings["sourcePaths"] as? [String: String] ?? [:]
     }()
-
+    
     private var sourcePaths: [String: String] {
         get { return _sourcePaths }
         set {
             _sourcePaths = newValue
             layoutSettings["sourcePaths"] = _sourcePaths
         }
-    }
-
+}
+    
     private func _findProjectDirectory(at path: String) -> URL? {
         if let projectDirectory = _projectDirectory, path.hasPrefix(projectDirectory.path) {
             return projectDirectory
         }
-
+        
         var url = URL(fileURLWithPath: path).standardizedFileURL
         if !url.hasDirectoryPath {
             url.deleteLastPathComponent()
@@ -416,20 +425,20 @@ class LayoutLoader {
                 at: url,
                 includingPropertiesForKeys: nil,
                 options: []
-            ), files.contains(where: { ["xcodeproj", "xcworkspace"].contains($0.pathExtension) }) {
+                ), files.contains(where: { ["xcodeproj", "xcworkspace"].contains($0.pathExtension) }) {
                 return url
             }
             url.deleteLastPathComponent()
         }
         return nil
     }
-
+    
     private func _findSourceURL(
         forRelativePath path: String,
         in directory: URL,
         ignoring: [URL],
         usingCache: Bool
-    ) throws -> URL? {
+        ) throws -> URL? {
         if let filePath = sourcePaths[path], FileManager.default.fileExists(atPath: filePath) {
             return URL(fileURLWithPath: filePath)
         }
@@ -450,33 +459,33 @@ class LayoutLoader {
         for file in files where
             file != "build" && !file.hasPrefix(".") && ![
                 ".build", ".app", ".framework", ".xcodeproj", ".xcassets"
-            ].contains(where: { file.hasSuffix($0) }) {
-            let directory = directory.appendingPathComponent(file)
-            if ignoring.contains(directory) {
-                continue
-            }
-            if file == parts[0] {
-                if parts.count == 1 {
-                    results.append(directory) // Not actually a directory
-                    continue
-                }
-                try _findSourceURL(
-                    forRelativePath: parts.dropFirst().joined(separator: "/"),
-                    in: directory,
-                    ignoring: ignoring,
-                    usingCache: false
-                ).map {
-                    results.append($0)
-                }
-            }
-            try _findSourceURL(
-                forRelativePath: path,
-                in: directory,
-                ignoring: ignoring,
-                usingCache: false
-            ).map {
-                results.append($0)
-            }
+                ].contains(where: { file.hasSuffix($0) }) {
+                    let directory = directory.appendingPathComponent(file)
+                    if ignoring.contains(directory) {
+                        continue
+                    }
+                    if file == parts[0] {
+                        if parts.count == 1 {
+                            results.append(directory) // Not actually a directory
+                            continue
+                        }
+                        try _findSourceURL(
+                            forRelativePath: parts.dropFirst().joined(separator: "/"),
+                            in: directory,
+                            ignoring: ignoring,
+                            usingCache: false
+                            ).map {
+                                results.append($0)
+                        }
+                    }
+                    try _findSourceURL(
+                        forRelativePath: path,
+                        in: directory,
+                        ignoring: ignoring,
+                        usingCache: false
+                        ).map {
+                            results.append($0)
+                    }
         }
         guard results.count <= 1 else {
             throw LayoutError.multipleMatches(results, for: path)
@@ -486,23 +495,24 @@ class LayoutLoader {
         }
         return results.first
     }
-
+    
     private func _setSourceURL(_ sourceURL: URL, for path: String) {
         guard sourceURL.isFileURL else {
             preconditionFailure()
         }
         sourcePaths[path] = sourceURL.path
     }
-
+    
     private func _clearSourceURLs() {
         sourcePaths.removeAll()
     }
-
+    
 #else
-
+    
     private func _findProjectDirectory(at _: String) -> URL? { return nil }
     private func _findSourceURL(forRelativePath _: String, in _: URL, ignoring _: [URL], usingCache _: Bool) throws -> URL? { return nil }
     private func _setSourceURL(_: URL, for _: String) {}
     private func _clearSourceURLs() {}
-
+    
 #endif
+
