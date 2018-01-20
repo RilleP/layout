@@ -1092,7 +1092,7 @@
 					};
 					011CE6421F05338A0034771C = {
 						CreatedOnToolsVersion = 8.3.3;
-						DevelopmentTeam = 8VQKF583ED;
+						DevelopmentTeam = 3HK4A56WNU;
 						LastSwiftMigration = 0900;
 						ProvisioningStyle = Automatic;
 					};
@@ -1694,10 +1694,10 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = 8VQKF583ED;
+				DEVELOPMENT_TEAM = 3HK4A56WNU;
 				INFOPLIST_FILE = SampleApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.SampleApp;
+				PRODUCT_BUNDLE_IDENTIFIER = com.rp.sma;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -1707,10 +1707,10 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = 8VQKF583ED;
+				DEVELOPMENT_TEAM = 3HK4A56WNU;
 				INFOPLIST_FILE = SampleApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.SampleApp;
+				PRODUCT_BUNDLE_IDENTIFIER = com.rp.sma;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;

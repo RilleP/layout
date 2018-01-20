@@ -96,6 +96,7 @@ public extension LayoutLoading {
         }
         return loader
     }
+    
 }
 
 public extension LayoutLoading where Self: UIView {

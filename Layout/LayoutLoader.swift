@@ -245,7 +245,7 @@ class LayoutLoader {
             assert(Thread.isMainThread) // TODO: can we parse XML in the background instead?
             do {
                 let layout = try Layout(xmlData: data, url: _xmlURL, relativeTo: relativeTo)
-                queue.async { cache[self._xmlURL] = layout }
+                //queue.async { cache[self._xmlURL] = layout }
                 layout.processTemplates(completion: completion)
             } catch {
                 throw LayoutError(error, in: xmlURL.lastPathComponent)

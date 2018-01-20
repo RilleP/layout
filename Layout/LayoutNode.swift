@@ -680,7 +680,7 @@ public class LayoutNode: NSObject {
     }
     
     /// The root node of this layout tree (unretained)
-    private var _root: LayoutNode?
+    private weak var _root: LayoutNode?
     public var root: LayoutNode {
         if _root == nil {
             _root = parent?.root ?? self
@@ -2617,6 +2617,7 @@ extension NSObject {
             retained ? .OBJC_ASSOCIATION_RETAIN_NONATOMIC : .OBJC_ASSOCIATION_ASSIGN
         )
     }
+    
 }
 
 private var viewSwizzled = false
