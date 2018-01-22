@@ -2502,43 +2502,28 @@ public class LayoutNode: NSObject {
             }
         }
         if let outlet = outlet {
-            guard let type = Swift.type(of: owner).allPropertyTypes()[outlet] else {
-                let mirror = Mirror(reflecting: owner)
-                if mirror.children.contains(where: { $0.label == outlet }) {
-                    throw LayoutError("\(owner.classForCoder) \(outlet) outlet must be prefixed with @objc or @IBOutlet to be used with Layout")
+            var success = false;
+            var o : LayoutNode = self;
+            while true {
+                if try self.tryToBindOutlet(to: o.view, outlet: outlet) {
+                    success = true;
+                    break;
                 }
-                throw LayoutError("\(owner.classForCoder) does not have an outlet named \(outlet)", for: self)
-            }
-            var didMatch = false
-            var expectedType = "UIView or LayoutNode"
-            if viewController != nil {
-                expectedType = "UIViewController, \(expectedType)"
-            }
-            if type.matches(LayoutNode.self) {
-                if type.matches(self) {
-                    owner.setValue(self, forKey: outlet)
-                    didMatch = true
-                } else {
-                    expectedType = "\(Swift.type(of: self))"
+                if let parent = o.parent {
+                    o = parent;
                 }
-            } else if type.matches(UIView.self) {
-                if type.matches(view) {
-                    owner.setValue(view, forKey: outlet)
-                    didMatch = true
-                } else {
-                    expectedType = "\(viewClass)"
-                }
-            } else if let viewController = viewController, type.matches(UIViewController.self) {
-                if type.matches(viewController) {
-                    owner.setValue(viewController, forKey: outlet)
-                    didMatch = true
-                } else {
-                    expectedType = "\(_class)"
+                else {
+                    if try self.tryToBindOutlet(to: owner, outlet: outlet) {
+                        success = true;
+                    }
+                    break;
                 }
             }
-            if !didMatch {
-                throw LayoutError("outlet \(outlet) of \(owner.classForCoder) is not a \(expectedType)", for: self)
+            
+            if !success {
+                throw LayoutError("\(o.classForCoder) does not have an outlet named \(outlet)", for: self)
             }
+            
         }
         for (name, type) in viewExpressionTypes where expressions[name] == nil {
             guard case .protocol = type.type, type.matches(owner),
@@ -2555,6 +2540,48 @@ public class LayoutNode: NSObject {
             try LayoutError.wrap({ try child.bind(to: owner) }, for: self)
         }
         try throwUnhandledError()
+    }
+    
+    
+    private func tryToBindOutlet(to owner: NSObject, outlet: String) throws -> Bool {
+        guard let type = Swift.type(of: owner).allPropertyTypes()[outlet] else {
+            let mirror = Mirror(reflecting: owner)
+            if mirror.children.contains(where: { $0.label == outlet }) {
+                throw LayoutError("\(owner.classForCoder) \(outlet) outlet must be prefixed with @objc or @IBOutlet to be used with Layout")
+            }
+            return false;
+        }
+        var didMatch = false
+        var expectedType = "UIView or LayoutNode"
+        if viewController != nil {
+            expectedType = "UIViewController, \(expectedType)"
+        }
+        if type.matches(LayoutNode.self) {
+            if type.matches(self) {
+                owner.setValue(self, forKey: outlet)
+                didMatch = true
+            } else {
+                expectedType = "\(Swift.type(of: self))"
+            }
+        } else if type.matches(UIView.self) {
+            if type.matches(view) {
+                owner.setValue(view, forKey: outlet)
+                didMatch = true
+            } else {
+                expectedType = "\(viewClass)"
+            }
+        } else if let viewController = viewController, type.matches(UIViewController.self) {
+            if type.matches(viewController) {
+                owner.setValue(viewController, forKey: outlet)
+                didMatch = true
+            } else {
+                expectedType = "\(_class)"
+            }
+        }
+        if !didMatch {
+            throw LayoutError("outlet \(outlet) of \(owner.classForCoder) is not a \(expectedType)", for: self)
+        }
+        return true;
     }
     
     /// Unbinds the node from its owner but doesn't remove
