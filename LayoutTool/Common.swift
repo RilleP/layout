@@ -49,7 +49,6 @@ struct FileOptions {
 
     public init(followSymlinks: Bool = false,
                 supportedFileExtensions: [String] = ["xml"]) {
-
         self.followSymlinks = followSymlinks
         self.supportedFileExtensions = supportedFileExtensions
     }
@@ -70,7 +69,6 @@ func enumerateFiles(withInputURL inputURL: URL,
                     options: FileOptions = FileOptions(),
                     concurrent: Bool = true,
                     block: @escaping (URL, URL) throws -> () throws -> Void) -> [Error] {
-
     guard let resourceValues = try? inputURL.resourceValues(
         forKeys: Set([.isDirectoryKey, .isAliasFileKey, .isSymbolicLinkKey])) else {
         if FileManager.default.fileExists(atPath: inputURL.path) {
@@ -105,7 +103,6 @@ func enumerateFiles(withInputURL inputURL: URL,
                    outputURL: URL?,
                    options: FileOptions,
                    block: @escaping (URL, URL) throws -> () throws -> Void) {
-
         for excludedURL in excludedURLs {
             if inputURL.absoluteString.hasPrefix(excludedURL.absoluteString) {
                 return
@@ -261,8 +258,9 @@ func typeOfAttribute(_ key: String, inNode node: XMLNode) -> String? {
             return "String"
         case "xml", "template":
             return "URL"
-        case "left", "right", "width", "top", "bottom", "height",
-             "center.x", "center.y", "firstBaseline", "lastBaseline":
+        case "center":
+            return "CGPoint"
+        case _ where layoutSymbols.contains(key):
             return "CGFloat"
         default:
             // Look up the type
@@ -329,41 +327,19 @@ func validateLayoutExpression(_ parsedExpression: ParsedLayoutExpression) throws
     if let error = parsedExpression.error, error != .unexpectedToken("") {
         throw error
     }
-    let keys = Set(Expression.mathSymbols.keys).union(Expression.boolSymbols.keys).union([
-        .postfix("%"),
-        .function("rgb", arity: 3),
-        .function("rgba", arity: 4),
-    ])
     for symbol in parsedExpression.symbols {
         switch symbol {
         case .variable, .array:
             break
         case .prefix, .infix, .postfix:
-            guard keys.contains(symbol) else {
+            guard standardSymbols.contains(symbol) else {
                 throw Expression.Error.undefinedSymbol(symbol)
             }
         case let .function(called, arity):
-            guard keys.contains(symbol) else {
-                for case let .function(name, requiredArity) in keys
-                    where name == called && arity != requiredArity {
-                    throw Expression.Error.arityMismatch(.function(called, arity: requiredArity))
-                }
-                throw Expression.Error.undefinedSymbol(symbol)
+            for case let .function(name, requiredArity) in standardSymbols
+                where name == called && arity != requiredArity {
+                throw Expression.Error.arityMismatch(.function(called, arity: requiredArity))
             }
-        }
-    }
-}
-
-// Print parsed expression
-extension ParsedExpressionPart: CustomStringConvertible {
-    var description: String {
-        switch self {
-        case let .string(string):
-            return string
-        case let .comment(comment):
-            return "// \(comment)"
-        case let .expression(expression):
-            return "{\(expression)}"
         }
     }
 }

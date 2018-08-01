@@ -16,11 +16,30 @@ extension LayoutError {
         switch error {
         case let error as SymbolError where error.description.contains("Unknown property"):
             if error.description.contains("expression") {
-                var suggestions = node.availableSymbols(forExpression: error.symbol)
+                let symbol: String
                 if let subError = error.error as? SymbolError {
-                    suggestions = bestMatches(for: subError.symbol, in: suggestions)
+                    symbol = subError.symbol
                 } else {
-                    suggestions = bestMatches(for: error.symbol, in: suggestions)
+                    symbol = error.symbol
+                }
+                let suggestions = bestMatches(
+                    for: symbol, in: node.availableSymbols(forExpression: error.symbol)
+                )
+                self.init(LayoutError.unknownSymbol(error, suggestions), for: node)
+            } else {
+                let suggestions = bestMatches(for: error.symbol, in: node.availableExpressions)
+                self.init(LayoutError.unknownExpression(error, suggestions), for: node)
+            }
+        case let error as SymbolError where error.description.contains("static property"):
+            if error.description.contains("expression") {
+                let symbol: String
+                if let subError = error.error as? SymbolError {
+                    symbol = subError.symbol
+                } else {
+                    symbol = error.symbol
+                }
+                guard let suggestions = staticPropertyMatches(for: symbol) else {
+                    fallthrough
                 }
                 self.init(LayoutError.unknownSymbol(error, suggestions), for: node)
             } else {
@@ -41,7 +60,51 @@ extension LayoutError {
     }
 }
 
-func bestMatches(for symbol: String, in suggestions: [String]) -> [String] {
+private func staticPropertyMatches(for key: String) -> [String]? {
+    var tail = key
+    var head = ""
+    while tail.isCapitalized, let range = tail.range(of: ".") {
+        if !head.isEmpty {
+            head += "."
+        }
+        head += String(tail[..<range.lowerBound])
+        tail = String(tail[range.upperBound...])
+    }
+    guard !head.isEmpty, let type = RuntimeType.type(named: head) else {
+        return nil
+    }
+    switch type.kind {
+    case let .options(_, values):
+        return bestMatches(for: tail, in: Set(values.keys))
+    case let .any(type as NSObject.Type):
+        var suffix = head.components(separatedBy: ".").last!
+        for prefix in ["UI", "NS"] {
+            if suffix.hasPrefix(prefix) {
+                suffix = String(suffix[prefix.endIndex ..< suffix.endIndex])
+                break
+            }
+        }
+        var keys = Set<String>()
+        var numberOfMethods: CUnsignedInt = 0
+        let methods = class_copyMethodList(object_getClass(type.self), &numberOfMethods)!
+        for i in 0 ..< Int(numberOfMethods) {
+            let selector: Selector = method_getName(methods[i])
+            var name = String(describing: selector)
+            guard !name.contains(":"), !name.hasPrefix("_") else {
+                continue
+            }
+            if name.hasSuffix(suffix) {
+                name.removeLast(suffix.count)
+            }
+            keys.insert(name)
+        }
+        return bestMatches(for: tail, in: keys)
+    default:
+        return nil
+    }
+}
+
+func bestMatches(for symbol: String, in suggestions: Set<String>) -> [String] {
     func levenshtein(_ lhs: String, _ rhs: String) -> Int {
         var dist = [[Int]]()
         for i in 0 ... lhs.count {
@@ -65,9 +128,9 @@ func bestMatches(for symbol: String, in suggestions: [String]) -> [String] {
     let lowercasedSymbol = symbol.lowercased()
     // Sort suggestions by Levenshtein distance
     return suggestions
-        .flatMap { (string) -> (String, Int)? in
+        .compactMap { (string) -> (String, Int)? in
             let lowercaseString = string.lowercased()
-            // Eliminate keypaths unless symbol itself is a keypath or is part of result
+            // Eliminate keyPaths unless symbol itself is a keyPath or is part of result
             guard !lowercaseString.contains(".") || symbol.contains(".") ||
                 lowercaseString.hasPrefix("\(lowercasedSymbol).") else {
                 return nil

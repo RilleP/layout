@@ -4,7 +4,7 @@ import UIKit
 
 extension UITableView: LayoutBacked {
     open override class func create(with node: LayoutNode) throws -> UITableView {
-        let style = try node.value(forExpression: "style") as? UITableViewStyle ?? .plain
+        let style = try node.value(forExpression: "style") as? UITableView.Style ?? .plain
         let tableView = self.init(frame: .zero, style: style)
         tableView.enableAutoSizing()
         return tableView
@@ -12,11 +12,11 @@ extension UITableView: LayoutBacked {
 
     fileprivate func enableAutoSizing() {
         estimatedRowHeight = 44
-        rowHeight = UITableViewAutomaticDimension
+        rowHeight = UITableView.automaticDimension
         estimatedSectionHeaderHeight = 0
-        sectionHeaderHeight = UITableViewAutomaticDimension
+        sectionHeaderHeight = UITableView.automaticDimension
         estimatedSectionFooterHeight = 0
-        sectionFooterHeight = UITableViewAutomaticDimension
+        sectionFooterHeight = UITableView.automaticDimension
     }
 
     open override class var parameterTypes: [String: RuntimeType] {
@@ -142,11 +142,7 @@ extension UITableView: LayoutBacked {
     open override var contentSize: CGSize {
         didSet {
             if oldValue != contentSize, let layoutNode = layoutNode {
-                let contentOffset = self.contentOffset.y
-                layoutNode.update()
-                if contentOffset >= 0 {
-                    self.contentOffset.y = contentOffset
-                }
+                layoutNode.contentSizeChanged()
             }
         }
     }
@@ -160,7 +156,7 @@ extension UITableView: LayoutBacked {
 
 extension UITableViewController: LayoutBacked {
     open override class func create(with node: LayoutNode) throws -> UITableViewController {
-        let style = try node.value(forExpression: "style") as? UITableViewStyle ?? .plain
+        let style = try node.value(forExpression: "style") as? UITableView.Style ?? .plain
         let viewController = self.init(style: style)
         if !node.children.contains(where: { $0.viewClass is UITableView.Type }) {
             viewController.tableView.enableAutoSizing()
@@ -397,15 +393,9 @@ extension UITableView {
                 }
                 nodes?.add(node)
                 node.delegate = self
-                try node.bind(to: node.view) // TODO: find a better solution for binding
                 let cell = node.view
                 cell.setValue(identifier, forKey: "reuseIdentifier")
-                node.performWithoutUpdate {
-                    cell.frame.size = CGSize(
-                        width: bounds.width,
-                        height: estimatedRowHeight > 0 ? estimatedRowHeight : rowHeight
-                    )
-                }
+                try node.bind(to: cell) // TODO: find a better solution for binding
                 return node
             case let .failure(error):
                 throw error
@@ -460,20 +450,24 @@ extension UITableViewHeaderFooterView: LayoutBacked {
             types["detailTextLabel.\(key)"] = type
         }
 
+        // Private and read-only properties
+        for name in [
+            "backgroundImage",
+            "textAlignment",
+            "text",
+        ] + [
+            "reuseIdentifier",
+            "sectionHeader",
+            "table",
+            "tableView",
+            "tableViewStyle",
+        ] {
+            types[name] = nil
+        }
         #if arch(i386) || arch(x86_64)
-            // Private and read-only properties
             for name in [
-                "backgroundImage",
                 "floating",
                 "maxTitleWidth",
-                "text",
-                "textAlignment",
-            ] + [
-                "reuseIdentifier",
-                "sectionHeader",
-                "table",
-                "tableView",
-                "tableViewStyle",
             ] {
                 types[name] = nil
             }
@@ -491,11 +485,12 @@ extension UITableViewHeaderFooterView: LayoutBacked {
             return super.intrinsicContentSize
         }
         return CGSize(
-            width: UIViewNoIntrinsicMetric,
-            height: textLabel?.intrinsicContentSize.height ?? UIViewNoIntrinsicMetric
+            width: UIView.noIntrinsicMetric,
+            height: textLabel?.intrinsicContentSize.height ?? UIView.noIntrinsicMetric
         )
     }
 
+    // TODO: it looks like UITableView doesn't use this for auto-sizing sections header/footer - remove it?
     open override func sizeThatFits(_ size: CGSize) -> CGSize {
         if let layoutNode = layoutNode {
             let height = (try? layoutNode.doubleValue(forSymbol: "height")) ?? 0
@@ -507,7 +502,7 @@ extension UITableViewHeaderFooterView: LayoutBacked {
 
 extension UITableViewCell: LayoutBacked {
     open override class func create(with node: LayoutNode) throws -> UITableViewCell {
-        let style = try node.value(forExpression: "style") as? UITableViewCellStyle ?? .default
+        let style = try node.value(forExpression: "style") as? UITableViewCell.CellStyle ?? .default
         let reuseIdentifier = try node.value(forExpression: "reuseIdentifier") as? String
         let cell = self.init(style: style, reuseIdentifier: reuseIdentifier)
         if node.expressions.keys.contains(where: { $0.hasPrefix("backgroundView.") }),
@@ -549,15 +544,17 @@ extension UITableViewCell: LayoutBacked {
             types["detailTextLabel.\(key)"] = type
         }
 
+        // Private and read-only properties
+        types["lineBreakMode"] = nil
+        types["textAlignment"] = nil
+        types["textColor"] = nil
         #if arch(i386) || arch(x86_64)
-            // Private and read-only properties
             for name in [
                 "accessoryAction",
                 "bottomShadowColor",
                 "clipsContents",
                 "drawingEnabled",
                 "hidesAccessoryWhenEditing",
-                "lineBreakMode",
                 "returnAction",
                 "sectionBorderColor",
                 "sectionLocation",
@@ -569,8 +566,6 @@ extension UITableViewCell: LayoutBacked {
                 "tableBackgroundColor",
                 "tableSpecificElementsHidden",
                 "tableViewStyle",
-                "textAlignment",
-                "textColor",
                 "textFieldOffset",
                 "topShadowColor",
                 "wasSwiped",
@@ -583,6 +578,10 @@ extension UITableViewCell: LayoutBacked {
             }
         #endif
         return types
+    }
+
+    open override class var bodyExpression: String? {
+        return "textLabel.attributedText"
     }
 
     open override func setAnimatedValue(_ value: Any, forExpression name: String) throws {

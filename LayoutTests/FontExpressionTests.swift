@@ -3,8 +3,11 @@
 import XCTest
 @testable import Layout
 
-class FontExpressionTests: XCTestCase {
+extension UIFont {
+    @objc static let testFont = UIFont.systemFont(ofSize: 46)
+}
 
+class FontExpressionTests: XCTestCase {
     func testBold() {
         let node = LayoutNode()
         let expression = LayoutExpression(fontExpression: "bold", for: node)
@@ -247,6 +250,30 @@ class FontExpressionTests: XCTestCase {
         XCTAssertThrowsError(try expression?.evaluate()) { error in
             XCTAssertTrue("\(error)".contains("Invalid font name or specifier"))
         }
+    }
+
+    func testCustomStaticFont1() {
+        let node = LayoutNode()
+        let expression = LayoutExpression(fontExpression: "testFont", for: node)
+        XCTAssertEqual((try expression?.evaluate() as? UIFont)?.pointSize, UIFont.testFont.pointSize)
+    }
+
+    func testCustomStaticFont2() {
+        let node = LayoutNode()
+        let expression = LayoutExpression(fontExpression: "test", for: node)
+        XCTAssertEqual((try expression?.evaluate() as? UIFont)?.pointSize, UIFont.testFont.pointSize)
+    }
+
+    func testCustomStaticFont3() {
+        let node = LayoutNode()
+        let expression = LayoutExpression(fontExpression: "{UIFont.testFont}", for: node)
+        XCTAssertEqual((try expression?.evaluate() as? UIFont)?.pointSize, UIFont.testFont.pointSize)
+    }
+
+    func testCustomStaticFont4() {
+        let node = LayoutNode()
+        let expression = LayoutExpression(fontExpression: "{testFont}", for: node)
+        XCTAssertThrowsError(try expression?.evaluate())
     }
 
     func testAmbiguousFamilyName() {

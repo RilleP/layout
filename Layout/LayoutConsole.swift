@@ -85,7 +85,7 @@ private class LayoutErrorView: UIView, LayoutLoading {
                 autoresizingMask = [.flexibleWidth, .flexibleHeight]
                 window.addSubview(self)
             }
-            window.bringSubview(toFront: self)
+            window.bringSubviewToFront(self)
         }
 
         // Display error
@@ -130,10 +130,10 @@ private class LayoutErrorView: UIView, LayoutLoading {
                 )
             }
         default:
-            background = "red"
+            background = "#D32F2F"
             let suggestions = error.suggestions
             if suggestions.count == 1 {
-                message += "\n\nDid you mean `\(suggestions[0])`?"
+                message += "\n\nDid you mean \(suggestions[0])?"
             } else if !suggestions.isEmpty {
                 message += " Did you mean one of the following?"
             }
@@ -166,7 +166,7 @@ private class LayoutErrorView: UIView, LayoutLoading {
                         expressions: [
                             "width": "min(auto, 100% - 40)",
                             "left": "(100% - width) / 2",
-                            "text": suggestions.joined(separator: ", "),
+                            "text": suggestions.prefix(20).joined(separator: ", "),
                             "textColor": "rgba(255,255,255,0.7)",
                             "numberOfLines": "0",
                             "top": "previous.bottom + 20",
@@ -283,7 +283,7 @@ private class LayoutWarningView: UIView, LayoutLoading {
                 window.insertSubview(self, belowSubview: errorView)
             } else if window.subviews.last != self {
                 alpha = 0
-                window.bringSubview(toFront: self)
+                window.bringSubviewToFront(self)
             }
         }
 
@@ -307,7 +307,7 @@ private class LayoutWarningView: UIView, LayoutLoading {
                         expressions: [
                             "top": "5",
                             "left": "10",
-                            "right": "100% - 10",
+                            "width": "100% - 20",
                             "numberOfLines": "0",
                             "height": "auto",
                             "text": "{warning}",

@@ -4,11 +4,10 @@ import XCTest
 @testable import Layout
 
 extension UIColor {
-    @objc static var testColor: UIColor { return UIColor.brown }
+    @objc static let testColor = UIColor.brown
 }
 
 class ColorExpressionTests: XCTestCase {
-
     func testRed() {
         let node = LayoutNode()
         let expression = LayoutExpression(colorExpression: "red", for: node)
@@ -39,6 +38,18 @@ class ColorExpressionTests: XCTestCase {
     func testCustomStaticColor2() {
         let node = LayoutNode()
         let expression = LayoutExpression(colorExpression: "testColor", for: node)
+        XCTAssertEqual(try expression?.evaluate() as? UIColor, .testColor)
+    }
+
+    func testCustomStaticColor3() {
+        let node = LayoutNode()
+        let expression = LayoutExpression(colorExpression: "{UIColor.testColor}", for: node)
+        XCTAssertEqual(try expression?.evaluate() as? UIColor, .testColor)
+    }
+
+    func testCustomStaticColor4() {
+        let node = LayoutNode()
+        let expression = LayoutExpression(colorExpression: "{testColor}", for: node)
         XCTAssertEqual(try expression?.evaluate() as? UIColor, .testColor)
     }
 
@@ -100,7 +111,7 @@ class ColorExpressionTests: XCTestCase {
         XCTAssertEqual(try expression?.evaluate() as? UIColor, expected)
     }
 
-    func testNamedColor() {
+    func testNamedColorAsset() {
         let node = LayoutNode()
         let expression = LayoutExpression(colorExpression: "com.LayoutTests:MyColor", for: node)
         XCTAssertThrowsError(try expression?.evaluate() as? UIColor) { error in

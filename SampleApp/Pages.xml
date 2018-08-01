@@ -1,4 +1,4 @@
-<PagesViewController backgroundColor="#ddd">
+<PagesViewController view.backgroundColor="#ddd">
     <UIScrollView
         contentInset.bottom="safeAreaInsets.bottom"
         contentInset.top="max(safeAreaInsets.top + 10, 20)"
@@ -33,7 +33,7 @@
         />
     </UIScrollView>
     <UIPageControl
-        bottom="100% - parent.safeAreaInsets.bottom - 40"
+        bottom="parent.safeAreaInsets.bottom + 40"
         center.x="50%"
         isUserInteractionEnabled="false"
         numberOfPages="3"

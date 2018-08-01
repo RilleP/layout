@@ -4,7 +4,9 @@ import XCTest
 @testable import Layout
 
 private class TestView: UIView, LayoutLoading {}
-private class TestViewController: UIViewController, LayoutLoading {}
+private class TestViewController: UIViewController, LayoutLoading {
+    @IBOutlet var outlet: UIView?
+}
 
 class LayoutMountingTests: XCTestCase {
 
@@ -143,6 +145,31 @@ class LayoutMountingTests: XCTestCase {
         _ = vc.view // Initialize VC
         XCTAssertThrowsError(try node.mount(in: vc)) { error in
             XCTAssert("\(error)".contains("UITableView"))
+        }
+    }
+
+    // MARK: Duplicate views and outlets
+
+    func testDuplicateOutletError() {
+        let node = LayoutNode(children: [
+            LayoutNode(outlet: "outlet"),
+            LayoutNode(outlet: "outlet"),
+        ])
+        let vc = TestViewController()
+        XCTAssertThrowsError(try node.mount(in: vc)) { error in
+            XCTAssert("\(error)".contains("outlet"))
+        }
+    }
+
+    func testDuplicateViewError() {
+        let view = UIView()
+        let node = LayoutNode(children: [
+            LayoutNode(view: view),
+            LayoutNode(view: view),
+        ])
+        let vc = TestViewController()
+        XCTAssertThrowsError(try node.mount(in: vc)) { error in
+            XCTAssert("\(error)".contains("UIView"))
         }
     }
 }

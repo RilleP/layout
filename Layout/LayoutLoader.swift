@@ -4,13 +4,16 @@ import Foundation
 
 typealias LayoutLoaderCallback = (LayoutNode?, LayoutError?) -> Void
 
+func clearLayoutLoaderCache() {
+    cache.removeAll()
+}
+
 // Cache for previously loaded layouts
 private var cache = [URL: Layout]()
 private let queue = DispatchQueue(label: "com.Layout.LayoutLoader")
 private var reloadLock = 0
 
 private extension Layout {
-    
     /// Merges the contents of the specified layout into this one
     /// Will fail if the layout class is not a subclass of this one
     func merged(with layout: Layout) throws -> Layout {
@@ -34,19 +37,43 @@ private extension Layout {
         for (key, value) in layout.macros { // TODO: what about collisions?
             macros[key] = value
         }
-        return Layout(
+        let result = Layout(
             className: layout.className,
             id: layout.id ?? id,
             expressions: expressions,
             parameters: parameters,
             macros: macros,
-            children: children + layout.children,
+            children: children,
             body: layout.body ?? body,
             xmlPath: layout.xmlPath,
             templatePath: templatePath,
+            childrenTagIndex: childrenTagIndex,
             relativePath: layout.relativePath, // TODO: is this correct?
             rootURL: rootURL
         )
+        return insertChildren(layout.children, into: result)
+    }
+
+    // Insert children into hierarchy
+    private func insertChildren(_ children: [Layout], into layout: Layout) -> Layout {
+        func _insertChildren(_ children: [Layout], into layout: inout Layout) -> Bool {
+            if let index = layout.childrenTagIndex {
+                layout.children.insert(contentsOf: children, at: index)
+                return true
+            }
+            for (index, var child) in layout.children.enumerated() {
+                if _insertChildren(children, into: &child) {
+                    layout.children[index] = child
+                    return true
+                }
+            }
+            return false
+        }
+        var layout = layout
+        if !_insertChildren(children, into: &layout) {
+            layout.children += children
+        }
+        return layout
     }
     
     /// Recursively load all nested layout templates

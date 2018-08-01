@@ -1,4 +1,4 @@
-<UIViewController backgroundColor="#fee">
+<UIViewController view.backgroundColor="#fee">
     <UIScrollView
         contentInset.bottom="safeAreaInsets.bottom + PADDING"
         contentInset.left="safeAreaInsets.left + PADDING"
@@ -72,6 +72,13 @@
             font="body"
             numberOfLines="0"
             text="This text is using the 'body' UIFontTextStyle, and respects the user's dynamic font size setting"
+            top="SPACING"
+            width="100%"
+        />
+        <UILabel
+            backgroundColor="#0001"
+            numberOfLines="0"
+            text="This label contains text that has been {uppercased('uppercased')} using a custom callback function"
             top="SPACING"
             width="100%"
         />

@@ -9,7 +9,7 @@ private let validClasses: [String] = {
     let classes = objc_copyClassList(&classCount)
     var names = [String]()
     for cls in UnsafeBufferPointer(start: classes, count: Int(classCount)) {
-        if let cls = cls, class_getSuperclass(cls) != nil,
+        if class_getSuperclass(cls) != nil,
             class_conformsToProtocol(cls, NSObjectProtocol.self),
             cls.isSubclass(of: UIView.self) || cls.isSubclass(of: UIViewController.self) {
             let name = "\(cls)"
@@ -95,45 +95,39 @@ class EditViewController: UIViewController, UITextFieldDelegate {
             if !type.isAvailable {
                 return nil
             }
-            switch type.type {
-            case let .any(subtype):
-                switch subtype {
-                case is CGFloat.Type,
-                     is Double.Type,
-                     is Float.Type,
-                     is Int.Type,
-                     is NSNumber.Type,
-                     is Bool.Type,
-                     is String.Type,
-                     is NSString.Type,
-                     is NSAttributedString.Type,
-                     is UIColor.Type,
-                     is UIImage.Type,
-                     is UIFont.Type:
-                    return key
-                default:
-                    return nil
-                }
-            case .enum, .options, .class, .pointer("CGImage"), .pointer("CGColor"):
+            switch type.swiftType {
+            case is CGFloat.Type,
+                 is Double.Type,
+                 is Float.Type,
+                 is Int.Type,
+                 is NSNumber.Type,
+                 is Bool.Type,
+                 is String.Type,
+                 is NSString.Type,
+                 is NSAttributedString.Type,
+                 is UIColor.Type,
+                 is UIImage.Type,
+                 is UIFont.Type,
+                 is CGImage.Type,
+                 is CGColor.Type,
+                 is [String].Type:
                 return key
-            case .struct, .pointer, .protocol:
-                return nil
-            case let .array(elementType):
-                return filterType(key, elementType)
+            default:
+                return type.values.isEmpty ? nil : key
             }
         }
-        let fieldNames = ["top", "left", "width", "height", "bottom", "right"]
-            + node.viewControllerExpressionTypes.flatMap(filterType).sorted()
-            + node.viewExpressionTypes.flatMap(filterType).sorted {
-                switch ($0.hasPrefix("layer."), $1.hasPrefix("layer.")) {
-                case (true, true), (false, false):
-                    return $0 < $1
-                case (true, false):
-                    return false
-                case (false, true):
-                    return true
-                }
+        var fieldNames = ["top", "left", "width", "height", "bottom", "right"]
+        fieldNames.append(contentsOf: node.viewControllerExpressionTypes.compactMap(filterType).sorted())
+        fieldNames.append(contentsOf: node.viewExpressionTypes.compactMap(filterType).sorted {
+            switch ($0.hasPrefix("layer."), $1.hasPrefix("layer.")) {
+            case (true, true), (false, false):
+                return $0 < $1
+            case (true, false):
+                return false
+            case (false, true):
+                return true
             }
+        })
 
         let start = CACurrentMediaTime()
         for name in fieldNames {
@@ -221,16 +215,16 @@ class EditViewController: UIViewController, UITextFieldDelegate {
             }
         }
         if !match.isEmpty {
-            let string = NSMutableAttributedString(string: match.substring(to: text.endIndex),
-                                                   attributes: [NSForegroundColorAttributeName: UIColor.black])
-            string.append(NSMutableAttributedString(string: match.substring(from: text.endIndex),
-                                                    attributes: [NSForegroundColorAttributeName: UIColor.lightGray]))
+            let string = NSMutableAttributedString(string: String(match[...text.endIndex]),
+                                                   attributes: [NSAttributedStringKey.foregroundColor: UIColor.black])
+            string.append(NSMutableAttributedString(string: String(match[text.endIndex...]),
+                                                    attributes: [NSAttributedStringKey.foregroundColor: UIColor.lightGray]))
             classField.attributedText = string
             classField.selectedTextRange = classField.textRange(from: textRange.end, to: textRange.end)
             return
         }
         let string = NSAttributedString(string: text,
-                                        attributes: [NSForegroundColorAttributeName: UIColor.black])
+                                        attributes: [NSAttributedStringKey.foregroundColor: UIColor.black])
         classField.attributedText = string
         classField.selectedTextRange = classField.textRange(from: textRange.end, to: textRange.end)
     }
@@ -241,7 +235,7 @@ class EditViewController: UIViewController, UITextFieldDelegate {
             delegate?.didUpdateClass(UIView.self, for: node)
             return
         }
-        classField?.attributedText = NSAttributedString(string: text, attributes: [NSForegroundColorAttributeName: UIColor.black])
+        classField?.attributedText = NSAttributedString(string: text, attributes: [NSAttributedStringKey.foregroundColor: UIColor.black])
         guard let cls = NSClassFromString(text) as? NSObject.Type,
             cls is UIView.Type || cls is UIViewController.Type else {
             classField?.backgroundColor = UIColor(red: 1, green: 0.5, blue: 0.5, alpha: 1)

@@ -255,6 +255,17 @@ class LayoutNodeTests: XCTestCase {
         XCTAssertEqual((node.view.subviews[0] as! UILabel).text, "Foo")
     }
 
+    func testMacroNameShadowsConstant() {
+        let xmlData = "<UIView><macro name=\"foo\" value=\"foo + 'baz'\"/><UILabel text=\"{foo}\"/></UIView>".data(using: .utf8)!
+        let node = try! LayoutNode(xmlData: xmlData)
+        node.constants = ["foo": "bar"]
+        let errors = node.validate()
+        XCTAssert(errors.isEmpty)
+        let label = node.children[0]
+        XCTAssertEqual(try label.value(forSymbol: "text") as? String, "barbaz")
+        XCTAssertEqual(try label.constantValue(forSymbol: "text") as? String, "barbaz")
+    }
+
     // MARK: update(with:)
 
     func testUpdateViewWithSameClass() {
@@ -359,7 +370,7 @@ class LayoutNodeTests: XCTestCase {
         let node = LayoutNode(
             view: scrollView,
             state: [
-                "inset": UIEdgeInsets.zero,
+                "inset": UIEdgeInsets(),
                 "insetTop": 5,
             ],
             expressions: [
@@ -376,7 +387,7 @@ class LayoutNodeTests: XCTestCase {
         let scrollView = UIScrollView()
         let node = LayoutNode(
             view: scrollView,
-            state: ["inset": UIEdgeInsets.zero],
+            state: ["inset": UIEdgeInsets()],
             expressions: [
                 "contentInset": "inset",
                 "contentInset.top": "5",

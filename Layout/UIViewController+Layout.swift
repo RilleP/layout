@@ -2,9 +2,7 @@
 
 import UIKit
 
-private var _cachedExpressionTypes = [Int: [String: RuntimeType]]()
-
-extension UIBarButtonItem {
+extension UIBarButtonItem: LayoutConfigurable {
     /// Expression names and types
     @objc class var expressionTypes: [String: RuntimeType] {
         var types = allPropertyTypes()
@@ -32,7 +30,7 @@ extension UIBarButtonItem {
     }
 }
 
-extension UIViewController {
+extension UIViewController: LayoutManaged {
     /// Expression names and types
     @objc open class var expressionTypes: [String: RuntimeType] {
         var types = allPropertyTypes()
@@ -58,8 +56,13 @@ extension UIViewController {
         }
         // TODO: barButtonItem.backgroundImage, etc
 
+        // View properties
+        for (name, type) in UIView.cachedExpressionTypes {
+            types["view.\(name)"] = type
+        }
+
         #if arch(i386) || arch(x86_64)
-            // Private and read-only properties
+            // Private properties
             for name in [
                 "SKUIStackedBarSplit",
                 "aggregateStatisticsDisplayCountKey",
@@ -94,7 +97,14 @@ extension UIViewController {
                 "storePageProtocol",
                 "useLegacyContainment",
                 "wantsFullScreenLayout",
-            ] + [
+            ] {
+                types[name] = nil
+                for key in types.keys where key.hasPrefix(name) {
+                    types[key] = nil
+                }
+            }
+            // Read-only properties
+            for name in [
                 "disablesAutomaticKeyboardDismissal",
                 "interfaceOrientation",
                 "nibName",
@@ -104,9 +114,6 @@ extension UIViewController {
                 "view", // Not actually read-only, but Layout doesn't allow this to be set
             ] {
                 types[name] = nil
-                for key in types.keys where key.hasPrefix(name) {
-                    types[key] = nil
-                }
             }
         #endif
 
@@ -143,15 +150,6 @@ extension UIViewController {
         return types
     }
 
-    class var cachedExpressionTypes: [String: RuntimeType] {
-        if let types = _cachedExpressionTypes[self.hash()] {
-            return types
-        }
-        let types = expressionTypes
-        _cachedExpressionTypes[self.hash()] = types
-        return types
-    }
-
     private func copyTabBarItemProps(from oldItem: UITabBarItem, to newItem: UITabBarItem) {
         newItem.badgeValue = oldItem.badgeValue
         if #available(iOS 10.0, *) {
@@ -175,7 +173,7 @@ extension UIViewController {
         }
     }
 
-    private func updateTabBarItem(systemItem: UITabBarSystemItem) {
+    private func updateTabBarItem(systemItem: UITabBarItem.SystemItem) {
         guard let oldTabBarItem = tabBarItem else {
             tabBarItem = UITabBarItem(tabBarSystemItem: systemItem, tag: 0)
             return
@@ -221,7 +219,7 @@ extension UIViewController {
         return item
     }
 
-    private func updatedBarItem(_ item: UIBarButtonItem?, systemItem: UIBarButtonSystemItem) -> UIBarButtonItem {
+    private func updatedBarItem(_ item: UIBarButtonItem?, systemItem: UIBarButtonItem.SystemItem) -> UIBarButtonItem {
         guard var item = item else {
             return UIBarButtonItem(barButtonSystemItem: systemItem, target: nil, action: nil)
         }
@@ -240,9 +238,13 @@ extension UIViewController {
     /// Key is the symbol name, value is the suggested replacement
     /// Empty value string indicates no replacement available
     @objc open class var deprecatedSymbols: [String: String] {
-        return [
+        var deprecatedSymbols = [
             "automaticallyAdjustsScrollViewInsets": "UIScrollView.contentInsetAdjustmentBehavior",
         ]
+        for (key, alternative) in UIView.deprecatedSymbols {
+            deprecatedSymbols["view.\(key)"] = alternative
+        }
+        return deprecatedSymbols
     }
 
     /// Called to construct the view
@@ -263,19 +265,19 @@ extension UIViewController {
         case "tabBarItem.image":
             updateTabBarItem(image: value as? UIImage)
         case "tabBarItem.systemItem":
-            updateTabBarItem(systemItem: value as! UITabBarSystemItem)
+            updateTabBarItem(systemItem: value as! UITabBarItem.SystemItem)
         case "navigationItem.leftBarButtonItem.title":
             navigationItem.leftBarButtonItem = updatedBarItem(navigationItem.leftBarButtonItem, title: value as! String)
         case "navigationItem.leftBarButtonItem.image":
             navigationItem.leftBarButtonItem = updatedBarItem(navigationItem.leftBarButtonItem, image: value as! UIImage)
         case "navigationItem.leftBarButtonItem.systemItem":
-            navigationItem.leftBarButtonItem = updatedBarItem(navigationItem.leftBarButtonItem, systemItem: value as! UIBarButtonSystemItem)
+            navigationItem.leftBarButtonItem = updatedBarItem(navigationItem.leftBarButtonItem, systemItem: value as! UIBarButtonItem.SystemItem)
         case "navigationItem.rightBarButtonItem.title":
             navigationItem.rightBarButtonItem = updatedBarItem(navigationItem.rightBarButtonItem, title: value as! String)
         case "navigationItem.rightBarButtonItem.image":
             navigationItem.rightBarButtonItem = updatedBarItem(navigationItem.rightBarButtonItem, image: value as! UIImage)
         case "navigationItem.rightBarButtonItem.systemItem":
-            navigationItem.rightBarButtonItem = updatedBarItem(navigationItem.rightBarButtonItem, systemItem: value as! UIBarButtonSystemItem)
+            navigationItem.rightBarButtonItem = updatedBarItem(navigationItem.rightBarButtonItem, systemItem: value as! UIBarButtonItem.SystemItem)
         case "navigationItem.largeTitleDisplayMode":
             if #available(iOS 11.0, *) {
                 navigationItem.largeTitleDisplayMode = value as! UINavigationItem.LargeTitleDisplayMode
@@ -320,7 +322,7 @@ extension UIViewController {
     /// Called immediately after a child node is added
     @objc open func didInsertChildNode(_ node: LayoutNode, at index: Int) {
         for controller in node.viewControllers {
-            addChildViewController(controller)
+            addChild(controller)
         }
         node.view.frame = view.bounds
         if index > 0, let previous = node.parent?.children[index - 1].view {
@@ -333,7 +335,7 @@ extension UIViewController {
     /// Called immediately before a child node is removed
     @objc open func willRemoveChildNode(_ node: LayoutNode, at _: Int) {
         for controller in node.viewControllers {
-            controller.removeFromParentViewController()
+            controller.removeFromParent()
         }
         node.view.removeFromSuperview()
     }
@@ -350,7 +352,7 @@ extension UITabBar {
             "automatic": .automatic,
             "fill": .fill,
             "centered": .centered,
-        ] as [String: UITabBarItemPositioning])
+        ] as [String: UITabBar.ItemPositioning])
         types["barStyle"] = .uiBarStyle
         types["itemSpacing"] = .cgFloat
         types["itemWidth"] = .cgFloat
@@ -397,21 +399,32 @@ extension UITabBarController {
 
     open override class var expressionTypes: [String: RuntimeType] {
         var types = super.expressionTypes
+        types["delegate"] = RuntimeType(UITabBarControllerDelegate.self)
         types["selectedIndex"] = .int
+        types["viewControllers"] = .array(of: UIViewController.self)
         types["customizableViewControllers"] = .array(of: UIViewController.self)
 
+        // Read-only properties
+        types["tabBar"] = nil
+        // Private properties
         #if arch(i386) || arch(x86_64)
-            // Private and read-only properties
             for name in [
                 "moreChildViewControllers",
                 "showsEditButtonOnLeft",
-            ] + [
-                "tabBar",
             ] {
                 types[name] = nil
             }
         #endif
         return types
+    }
+
+    open override func setAnimatedValue(_ value: Any, forExpression name: String) throws {
+        switch name {
+        case "viewControllers":
+            setViewControllers(value as? [UIViewController], animated: true)
+        default:
+            try super.setAnimatedValue(value, forExpression: name)
+        }
     }
 
     open override func didInsertChildNode(_ node: LayoutNode, at index: Int) {
@@ -466,13 +479,13 @@ extension UINavigationBar: TitleTextAttributes {
     }
 
     var titleColor: UIColor? {
-        get { return titleTextAttributes?[NSAttributedStringKey.foregroundColor] as? UIColor }
-        set { titleTextAttributes?[NSAttributedStringKey.foregroundColor] = newValue }
+        get { return titleTextAttributes?[NSAttributedString.Key.foregroundColor] as? UIColor }
+        set { titleTextAttributes?[NSAttributedString.Key.foregroundColor] = newValue }
     }
 
     var titleFont: UIFont? {
-        get { return titleTextAttributes?[NSAttributedStringKey.font] as? UIFont }
-        set { titleTextAttributes?[NSAttributedStringKey.font] = newValue }
+        get { return titleTextAttributes?[NSAttributedString.Key.font] as? UIFont }
+        set { titleTextAttributes?[NSAttributedString.Key.font] = newValue }
     }
 
     open override func setAnimatedValue(_ value: Any, forExpression name: String) throws {
@@ -546,13 +559,13 @@ extension UINavigationController {
         var toolbarClass = try node.value(forExpression: "toolbarClass") as? UIToolbar.Type
         for child in node.children {
             if let cls = navigationBarClass, child._class is UINavigationBar.Type {
-                if child._class.isSubclass(of: cls) {
+                if (child._class as AnyClass).isSubclass(of: cls) {
                     navigationBarClass = child._class as? UINavigationBar.Type
                 } else if !cls.isSubclass(of: child._class) {
                     throw LayoutError("\(child._class) is not compatible with \(cls)")
                 }
             } else if let cls = toolbarClass, child._class is UIToolbar.Type {
-                if child._class.isSubclass(of: cls) {
+                if (child._class as AnyClass).isSubclass(of: cls) {
                     toolbarClass = child._class as? UIToolbar.Type
                 } else if !cls.isSubclass(of: child._class) {
                     throw LayoutError("\(child._class) is not compatible with \(cls)")
@@ -572,8 +585,15 @@ extension UINavigationController {
     open override class var expressionTypes: [String: RuntimeType] {
         var types = super.expressionTypes
         types["viewControllers"] = .array(of: UIViewController.self)
+        // Read-only properties
+        for name in [
+            "navigationBar",
+            "toolbar",
+        ] {
+            types[name] = nil
+        }
+        // Private properties
         #if arch(i386) || arch(x86_64)
-            // Private and read-only properties
             for name in [
                 "allowUserInteractionDuringTransition",
                 "avoidMovingNavBarOffscreenBeforeUnhiding",
@@ -586,9 +606,6 @@ extension UINavigationController {
                 "isInteractiveTransition",
                 "needsDeferredTransition",
                 "pretendNavBarHidden",
-            ] + [
-                "navigationBar",
-                "toolbar",
             ] {
                 types[name] = nil
             }
@@ -641,10 +658,7 @@ extension UINavigationController {
 extension UIAlertController {
     open override class var expressionTypes: [String: RuntimeType] {
         var types = super.expressionTypes
-        types["preferredStyle"] = RuntimeType([
-            "actionSheet": .actionSheet,
-            "alert": .alert,
-        ] as [String: UIAlertControllerStyle])
+        types["preferredStyle"] = .uiAlertControllerStyle
         #if arch(i386) || arch(x86_64)
             // Private properties
             for name in [
@@ -735,6 +749,7 @@ extension UISplitViewController {
     open override class var expressionTypes: [String: RuntimeType] {
         var types = super.expressionTypes
         types["preferredDisplayMode"] = .uiSplitViewControllerDisplayMode
+        types["viewControllers"] = .array(of: UIViewController.self)
         types["primaryEdge"] = .uiSplitViewControllerPrimaryEdge
 
         #if arch(i386) || arch(x86_64)

@@ -4,14 +4,15 @@ import UIKit
 import Layout
 
 class ExamplesViewController: UIViewController, LayoutLoading, UITabBarControllerDelegate {
-
     private var selectedTab = 0
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
         // Swift 3.x compatibility
-        #if swift(>=4)
+        #if swift(>=4.2)
+            let foregroundColorKey = NSAttributedString.Key.foregroundColor
+        #elseif swift(>=4)
             let foregroundColorKey = NSAttributedStringKey.foregroundColor
         #else
             let foregroundColorKey = NSForegroundColorAttributeName
@@ -33,6 +34,12 @@ class ExamplesViewController: UIViewController, LayoutLoading, UITabBarControlle
                     string: "attributed string",
                     attributes: [foregroundColorKey: UIColor.red]
                 ),
+                "uppercased": { (args: [Any]) throws -> Any in
+                    guard let string = args.first as? String else {
+                        throw LayoutError.message("uppercased() function expects a String argument")
+                    }
+                    return string.uppercased()
+                },
             ]
         )
     }

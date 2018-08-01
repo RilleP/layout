@@ -60,7 +60,7 @@ class XMLTests: XCTestCase {
         let input = "<UILabel><param name=\"text\" type=\"String\" value=\"foo\"/></UILabel>"
         let xmlData = input.data(using: .utf8)!
         XCTAssertThrowsError(try Layout(xmlData: xmlData)) { error in
-            XCTAssert("\(error)".contains("Unexpected attribute `value`"))
+            XCTAssert("\(error)".contains("Unexpected attribute value"))
         }
     }
 
@@ -76,7 +76,7 @@ class XMLTests: XCTestCase {
         let input = "<UILabel><param name=\"text\">foo</param></UILabel>"
         let xmlData = input.data(using: .utf8)!
         XCTAssertThrowsError(try Layout(xmlData: xmlData)) { error in
-            XCTAssert("\(error)".contains("should not contain children"))
+            XCTAssert("\(error)".contains("should not contain sub-nodes"))
         }
     }
 
@@ -92,7 +92,7 @@ class XMLTests: XCTestCase {
         let input = "<UILabel><macro name=\"text\" type=\"String\" value=\"foo\"/></UILabel>"
         let xmlData = input.data(using: .utf8)!
         XCTAssertThrowsError(try Layout(xmlData: xmlData)) { error in
-            XCTAssert("\(error)".contains("Unexpected attribute `type`"))
+            XCTAssert("\(error)".contains("Unexpected attribute type"))
         }
     }
 
@@ -100,7 +100,7 @@ class XMLTests: XCTestCase {
         let input = "<UILabel><macro name=\"text\">foo</macro></UILabel>"
         let xmlData = input.data(using: .utf8)!
         XCTAssertThrowsError(try Layout(xmlData: xmlData)) { error in
-            XCTAssert("\(error)".contains("should not contain children"))
+            XCTAssert("\(error)".contains("should not contain sub-nodes"))
         }
     }
 
@@ -158,6 +158,13 @@ class XMLTests: XCTestCase {
         XCTAssertEqual(layout.body, "Foo")
     }
 
+    func testInterleavedTextAndViewsInsideLabel() {
+        let input = "<UILabel>Foo<UIView/>Bar</UILabel>"
+        let xmlData = input.data(using: .utf8)!
+        let layout = try! Layout(xmlData: xmlData)
+        XCTAssertEqual(layout.body, "FooBar")
+    }
+
     func testPreserveWhitespaceInsideHTML() {
         let html = "Some <b>bold </b>and<i> italic</i> text"
         let input = "<UILabel>\n    \(html)\n</UILabel>"
@@ -167,7 +174,7 @@ class XMLTests: XCTestCase {
     }
 
     func testPreserveHTMLAttributes() {
-        let html = "An <img src=\"foo.jpg\" alt=\"foo\"/> tag"
+        let html = "An <img src=\"foo.jpg\"/> tag"
         let input = "<UILabel>\n    \(html)\n</UILabel>"
         let xmlData = input.data(using: .utf8)!
         let layout = try! Layout(xmlData: xmlData)

@@ -6,27 +6,27 @@
 	<dict>
 		<key>Resources/Base.lproj/Main.storyboardc/Info.plist</key>
 		<data>
-		Ul1utZyeYMjjK/kGGYwbOrXpzgg=
+		N8gJ0LddClJF51SET9PJaUS2DxY=
 		</data>
 		<key>Resources/Base.lproj/Main.storyboardc/MainMenu.nib</key>
 		<data>
-		K9FoY/IcABHLPpwPO7S4vScYVME=
+		9ZMD6K2R0FRZkFx7JefR/E5/y8M=
 		</data>
 		<key>Resources/Base.lproj/Main.storyboardc/NSWindowController-B8D-0N-5wS.nib</key>
 		<data>
-		a83fbH/zOtcMN7s6VZIXtP+zgMQ=
+		xDmUAK+jiLkB/zzeHSFo7Aje/aQ=
 		</data>
 		<key>Resources/Base.lproj/Main.storyboardc/ViewController.nib</key>
 		<data>
-		WtZOhcG3f5TaBkrOQF/wkmH0v9c=
+		eHrVIh9dw9tuAmab4ZxvSMwETR0=
 		</data>
 		<key>Resources/Base.lproj/Main.storyboardc/XfG-lQ-9wD-view-m2S-Jp-Qdl.nib</key>
 		<data>
-		E1gJpCik4+Hn4DQ+DS8FI0sI2Bs=
+		GpE1auCCA9cNH8YK4A4V9QHzCbM=
 		</data>
 		<key>Resources/libswiftRemoteMirror.dylib</key>
 		<data>
-		crULNDMnzc0rDmaQBHwL3FGx02o=
+		LdXExC/yGa2r0w+H7AyBPziE5sc=
 		</data>
 	</dict>
 	<key>files2</key>
@@ -35,7 +35,7 @@
 		<dict>
 			<key>cdhash</key>
 			<data>
-			RMXigcBwLe/6Dv/EK766IERSDs0=
+			bL6MRfKdAoMvOpoJWiEbRjEKneo=
 			</data>
 			<key>requirement</key>
 			<string>identifier "com.apple.dt.runtime.swiftAppKit" and anchor apple generic and certificate leaf[subject.CN] = "Mac Developer: Nick Lockwood (XDQ4XJZXHD)" and certificate 1[field.1.2.840.113635.100.6.2.1] /* exists */</string>
@@ -44,7 +44,7 @@
 		<dict>
 			<key>cdhash</key>
 			<data>
-			AWtkvlEY9NVlvRJiYUxPmyA7bNM=
+			Xh++iGknw+yolEOuphFfOhCR1ns=
 			</data>
 			<key>requirement</key>
 			<string>identifier "com.apple.dt.runtime.swiftCore" and anchor apple generic and certificate leaf[subject.CN] = "Mac Developer: Nick Lockwood (XDQ4XJZXHD)" and certificate 1[field.1.2.840.113635.100.6.2.1] /* exists */</string>
@@ -53,7 +53,7 @@
 		<dict>
 			<key>cdhash</key>
 			<data>
-			znlxDYeWju3Wn2z5R3ulD/X4Yz0=
+			gsU3Fioq99BbUJtHyumaF4ZF4lE=
 			</data>
 			<key>requirement</key>
 			<string>identifier "com.apple.dt.runtime.swiftCoreData" and anchor apple generic and certificate leaf[subject.CN] = "Mac Developer: Nick Lockwood (XDQ4XJZXHD)" and certificate 1[field.1.2.840.113635.100.6.2.1] /* exists */</string>
@@ -62,7 +62,7 @@
 		<dict>
 			<key>cdhash</key>
 			<data>
-			1HXLNPfryndUL/2/oxUOMCJFG7g=
+			+xORRpIzyJ7mVaAe64KJNoLB2Eo=
 			</data>
 			<key>requirement</key>
 			<string>identifier "com.apple.dt.runtime.swiftCoreFoundation" and anchor apple generic and certificate leaf[subject.CN] = "Mac Developer: Nick Lockwood (XDQ4XJZXHD)" and certificate 1[field.1.2.840.113635.100.6.2.1] /* exists */</string>
@@ -71,7 +71,7 @@
 		<dict>
 			<key>cdhash</key>
 			<data>
-			Q4qkCUq1dCsy+/XZAugRPcG7yGQ=
+			MwUnq5Ola6GQSloEt7H4BcE5tJE=
 			</data>
 			<key>requirement</key>
 			<string>identifier "com.apple.dt.runtime.swiftCoreGraphics" and anchor apple generic and certificate leaf[subject.CN] = "Mac Developer: Nick Lockwood (XDQ4XJZXHD)" and certificate 1[field.1.2.840.113635.100.6.2.1] /* exists */</string>
@@ -80,7 +80,7 @@
 		<dict>
 			<key>cdhash</key>
 			<data>
-			C4u4Yt+bZ7CzzqqODLhqHNlaGlo=
+			I+gZaT8Jx7PTaOSmGsVTZiS/0PM=
 			</data>
 			<key>requirement</key>
 			<string>identifier "com.apple.dt.runtime.swiftCoreImage" and anchor apple generic and certificate leaf[subject.CN] = "Mac Developer: Nick Lockwood (XDQ4XJZXHD)" and certificate 1[field.1.2.840.113635.100.6.2.1] /* exists */</string>
@@ -89,7 +89,7 @@
 		<dict>
 			<key>cdhash</key>
 			<data>
-			gVojr3lpGYUx5plo7Jrp81Spd8c=
+			qPxfzkP3q/obedj73E03Lt491YU=
 			</data>
 			<key>requirement</key>
 			<string>identifier "com.apple.dt.runtime.swiftDarwin" and anchor apple generic and certificate leaf[subject.CN] = "Mac Developer: Nick Lockwood (XDQ4XJZXHD)" and certificate 1[field.1.2.840.113635.100.6.2.1] /* exists */</string>
@@ -98,7 +98,7 @@
 		<dict>
 			<key>cdhash</key>
 			<data>
-			o5T5Jz1D7zlS0ODror7Usj8ZO18=
+			s0M5xQAO4u1XRxdWfezLg8H4Mf8=
 			</data>
 			<key>requirement</key>
 			<string>identifier "com.apple.dt.runtime.swiftDispatch" and anchor apple generic and certificate leaf[subject.CN] = "Mac Developer: Nick Lockwood (XDQ4XJZXHD)" and certificate 1[field.1.2.840.113635.100.6.2.1] /* exists */</string>
@@ -107,7 +107,7 @@
 		<dict>
 			<key>cdhash</key>
 			<data>
-			UvSIdjzdZ4AGtsx8zspZRMiNsq0=
+			K4a+ln6Jck4m95ct95MLsUvbkrU=
 			</data>
 			<key>requirement</key>
 			<string>identifier "com.apple.dt.runtime.swiftFoundation" and anchor apple generic and certificate leaf[subject.CN] = "Mac Developer: Nick Lockwood (XDQ4XJZXHD)" and certificate 1[field.1.2.840.113635.100.6.2.1] /* exists */</string>
@@ -116,7 +116,7 @@
 		<dict>
 			<key>cdhash</key>
 			<data>
-			2B4+xQHFanRzqiUeXj6quL3QZW4=
+			pzSLEyRZG6E5n2QKc4uw+v4WVFU=
 			</data>
 			<key>requirement</key>
 			<string>identifier "com.apple.dt.runtime.swiftIOKit" and anchor apple generic and certificate leaf[subject.CN] = "Mac Developer: Nick Lockwood (XDQ4XJZXHD)" and certificate 1[field.1.2.840.113635.100.6.2.1] /* exists */</string>
@@ -125,7 +125,7 @@
 		<dict>
 			<key>cdhash</key>
 			<data>
-			HN9KZh7I0cZw3xnE39hv6M4kn4s=
+			hnfzbxek5auIWvqiCLfF+v6mqHE=
 			</data>
 			<key>requirement</key>
 			<string>identifier "com.apple.dt.runtime.swiftMetal" and anchor apple generic and certificate leaf[subject.CN] = "Mac Developer: Nick Lockwood (XDQ4XJZXHD)" and certificate 1[field.1.2.840.113635.100.6.2.1] /* exists */</string>
@@ -134,7 +134,7 @@
 		<dict>
 			<key>cdhash</key>
 			<data>
-			Js0tYDFdsQ17mvOhkHXioAxbLhU=
+			VTr4biItdirb4GzpRJmwq6Ax+ic=
 			</data>
 			<key>requirement</key>
 			<string>identifier "com.apple.dt.runtime.swiftObjectiveC" and anchor apple generic and certificate leaf[subject.CN] = "Mac Developer: Nick Lockwood (XDQ4XJZXHD)" and certificate 1[field.1.2.840.113635.100.6.2.1] /* exists */</string>
@@ -143,7 +143,7 @@
 		<dict>
 			<key>cdhash</key>
 			<data>
-			890Q6QIOZY4DzNB5hjJTJTc3rtM=
+			wrtChOWn6zZngZgmoLlCPQMeAzI=
 			</data>
 			<key>requirement</key>
 			<string>identifier "com.apple.dt.runtime.swiftQuartzCore" and anchor apple generic and certificate leaf[subject.CN] = "Mac Developer: Nick Lockwood (XDQ4XJZXHD)" and certificate 1[field.1.2.840.113635.100.6.2.1] /* exists */</string>
@@ -152,7 +152,7 @@
 		<dict>
 			<key>cdhash</key>
 			<data>
-			eTJGvhGu0LFSv/JMoipkc2IHqzo=
+			O8zbTXA618cD70F2QrafO12IX/A=
 			</data>
 			<key>requirement</key>
 			<string>identifier "com.apple.dt.runtime.swiftXPC" and anchor apple generic and certificate leaf[subject.CN] = "Mac Developer: Nick Lockwood (XDQ4XJZXHD)" and certificate 1[field.1.2.840.113635.100.6.2.1] /* exists */</string>
@@ -161,7 +161,7 @@
 		<dict>
 			<key>cdhash</key>
 			<data>
-			Oe98/hivII3DiVrS3oEalhcZlDQ=
+			hcsyh3JcA4s5JpfTVBAe2DKqY+U=
 			</data>
 			<key>requirement</key>
 			<string>identifier "com.apple.dt.runtime.swiftos" and anchor apple generic and certificate leaf[subject.CN] = "Mac Developer: Nick Lockwood (XDQ4XJZXHD)" and certificate 1[field.1.2.840.113635.100.6.2.1] /* exists */</string>
@@ -170,7 +170,7 @@
 		<dict>
 			<key>cdhash</key>
 			<data>
-			6SLh5sWc71nQE/EYZetSLZFF3T8=
+			Hpds3R8HVZBkov7FZ7CQjhiUNL4=
 			</data>
 			<key>requirement</key>
 			<string>identifier "com.schibsted.Layout-for-Xcode.SourceEditorExtension" and anchor apple generic and certificate leaf[subject.CN] = "Mac Developer: Nick Lockwood (XDQ4XJZXHD)" and certificate 1[field.1.2.840.113635.100.6.2.1] /* exists */</string>
@@ -179,66 +179,66 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			Ul1utZyeYMjjK/kGGYwbOrXpzgg=
+			N8gJ0LddClJF51SET9PJaUS2DxY=
 			</data>
 			<key>hash2</key>
 			<data>
-			PqjZZQMJVsb2i9S0GN21NWm0w1xXXzWdfFoW2L+uQfI=
+			xmFwUXCb0vLAfph4i6O2QLI9On36VCQFB2yIMwgsBqg=
 			</data>
 		</dict>
 		<key>Resources/Base.lproj/Main.storyboardc/MainMenu.nib</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			K9FoY/IcABHLPpwPO7S4vScYVME=
+			9ZMD6K2R0FRZkFx7JefR/E5/y8M=
 			</data>
 			<key>hash2</key>
 			<data>
-			TPpUP5IasKKe/8zuY3WDeuGMdGLFokJ5Ne8WQlb64Ww=
+			LFH3SaahME5RzxD7dSbJNaZQFT8HrMyJLS+k+Q2gfuw=
 			</data>
 		</dict>
 		<key>Resources/Base.lproj/Main.storyboardc/NSWindowController-B8D-0N-5wS.nib</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			a83fbH/zOtcMN7s6VZIXtP+zgMQ=
+			xDmUAK+jiLkB/zzeHSFo7Aje/aQ=
 			</data>
 			<key>hash2</key>
 			<data>
-			Pp19NH8mSYRIh/4gzmWoJWRd0ZjTi2h7Wc32l1cbk7M=
+			hsLVMSJUqAWg06uoz1SAmmpu5+A0xHdcLpnmNFsGHE8=
 			</data>
 		</dict>
 		<key>Resources/Base.lproj/Main.storyboardc/ViewController.nib</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			WtZOhcG3f5TaBkrOQF/wkmH0v9c=
+			eHrVIh9dw9tuAmab4ZxvSMwETR0=
 			</data>
 			<key>hash2</key>
 			<data>
-			s0y7nBMqW/eSVNNaoz6HDpuas9Nxy6uNlFt3Tc2r7YA=
+			Ieze8ycYiXNHmgA4HpjUBi3+lxN1kLg26Faq2gWqPc0=
 			</data>
 		</dict>
 		<key>Resources/Base.lproj/Main.storyboardc/XfG-lQ-9wD-view-m2S-Jp-Qdl.nib</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			E1gJpCik4+Hn4DQ+DS8FI0sI2Bs=
+			GpE1auCCA9cNH8YK4A4V9QHzCbM=
 			</data>
 			<key>hash2</key>
 			<data>
-			TSOkhcXrC/d3aGuA0Q0INSuYp++HXem6ugDT5Aanv7M=
+			5HkbaPhrZVVGIuDmFr6i5IUHcHHRJE50O0TYsg1twns=
 			</data>
 		</dict>
 		<key>Resources/libswiftRemoteMirror.dylib</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			crULNDMnzc0rDmaQBHwL3FGx02o=
+			LdXExC/yGa2r0w+H7AyBPziE5sc=
 			</data>
 			<key>hash2</key>
 			<data>
-			A/WCcGNgZhwXa3IwClKsXkYBI0N03KBYYLVYHXHg/Do=
+			1foNDnM3PUkivBntIxeSItNKfl44X82yH3ZLokQNMaU=
 			</data>
 		</dict>
 	</dict>

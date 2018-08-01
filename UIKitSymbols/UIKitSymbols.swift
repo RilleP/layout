@@ -12,9 +12,7 @@ import WebKit
 @testable import Layout
 
 class UIKitSymbols: XCTestCase {
-
     func getProperties() -> [String: [String: RuntimeType]] {
-
         // Force classes to load
         _ = AVPlayerViewController()
         _ = WKWebView()
@@ -24,7 +22,6 @@ class UIKitSymbols: XCTestCase {
         let classes = objc_copyClassList(&classCount)
         var names = ["SKView"] // Doesn't load otherwise for some reason
         for cls in UnsafeBufferPointer(start: classes, count: Int(classCount)) {
-            let cls: AnyClass = cls!
             if class_getSuperclass(cls) != nil,
                 cls.isSubclass(of: UIView.self) || cls.isSubclass(of: UIViewController.self) {
                 let name = NSStringFromClass(cls)
@@ -51,6 +48,8 @@ class UIKitSymbols: XCTestCase {
         ]
         let blacklist = [
             "AVPlayerViewControllerContentView",
+            "AVPlayerViewControllerCustomControlsView",
+            "AVPlayerViewControllerCustomControlsViewLayoutMarginsGuideProvidingView",
             "MKOverlayContainer",
             "UIAccessibility",
             "UIActionSheet",
@@ -269,6 +268,10 @@ class UIKitSymbols: XCTestCase {
             "{ \"trigger\": \"template\tURL\", \"contents\": \"template=\\\"$0\\\"\" }",
             "{ \"trigger\": \"xml\tURL\", \"contents\": \"xml=\\\"$0\\\"\" }",
         ]
+        for name in Array(layoutSymbols).sorted() {
+            let type = (name == "center") ? "CGPoint" : "CGFloat"
+            rows.append("{ \"trigger\": \"\(name)\t\(type)\", \"contents\": \"\(name)\" }")
+        }
         let properties = getProperties()
         for name in properties.keys.sorted() {
             let props = properties[name]!

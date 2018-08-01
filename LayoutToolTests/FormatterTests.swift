@@ -32,6 +32,32 @@ class FormatterTests: XCTestCase {
         }
     }
 
+    func testUndefinedOperator() throws {
+        let input = "<Foo left=\"a^b\"/>"
+        XCTAssertThrowsError(try format(input)) { error in
+            guard case let FormatError.parsing(message) = error else {
+                XCTFail()
+                return
+            }
+            XCTAssert(message.contains("infix operator ^"))
+            XCTAssert(message.contains("left"))
+            XCTAssert(message.contains("Foo"))
+        }
+    }
+
+    func testRGBFunctionArity() throws {
+        let input = "<Foo color=\"rgb(1,2,3,4)\"/>"
+        XCTAssertThrowsError(try format(input)) { error in
+            guard case let FormatError.parsing(message) = error else {
+                XCTFail()
+                return
+            }
+            XCTAssert(message.contains("rgb() expects 3"))
+            XCTAssert(message.contains("color"))
+            XCTAssert(message.contains("Foo"))
+        }
+    }
+
     // MARK: Attributes
 
     func testNoAttributes() {
@@ -84,11 +110,23 @@ class FormatterTests: XCTestCase {
         XCTAssertEqual(try format(input), output)
     }
 
-    // MARK: Text
+    // MARK: Body text
 
     func testShortTextNode() {
         let input = "<Foo>\n    bar\n</Foo>"
         let output = "<Foo>bar</Foo>\n"
+        XCTAssertEqual(try format(input), output)
+    }
+
+    func testTextWithChildBefore() {
+        let input = "<Foo><Baz/>bar</Foo>"
+        let output = "<Foo>\n    <Baz/>\n    bar\n</Foo>\n"
+        XCTAssertEqual(try format(input), output)
+    }
+
+    func testTextWithChildAfter() {
+        let input = "<Foo>bar<Baz/></Foo>"
+        let output = "<Foo>\n    bar\n    <Baz/>\n</Foo>\n"
         XCTAssertEqual(try format(input), output)
     }
 
@@ -224,6 +262,14 @@ class FormatterTests: XCTestCase {
         XCTAssertEqual(try format(input), output)
     }
 
+    // MARK: Children tag
+
+    func testViewWithChildrenTag() {
+        let input = "<Foo>\n\n    <children/>\n\n</Foo>"
+        let output = "<Foo>\n    <children/>\n</Foo>\n"
+        XCTAssertEqual(try format(input), output)
+    }
+
     // MARK: Encoding
 
     func testEncodeAmpersandInText() {
@@ -282,6 +328,12 @@ class FormatterTests: XCTestCase {
         XCTAssertEqual(try format(input), output)
     }
 
+    func testFormatTextAttribute() {
+        let input = "<Foo text=\" foo ( bar ) \"/>"
+        let output = "<Foo text=\" foo ( bar ) \"/>\n"
+        XCTAssertEqual(try format(input), output)
+    }
+
     // MARK: Expression comments
 
     func testExpressionWithComment() {
@@ -321,14 +373,20 @@ class FormatterTests: XCTestCase {
     }
 
     func testCommentedOutStringExpression() {
+        let input = "<Foo text=\" //hello world\"/>"
+        let output = "<Foo text=\"// hello world\"/>\n"
+        XCTAssertEqual(try format(input), output)
+    }
+
+    func testCommentedOutStringExpressionClause() {
         let input = "<Foo text=\"{ //10-5* 4 }\"/>"
         let output = "<Foo text=\"{// 10-5* 4}\"/>\n"
         XCTAssertEqual(try format(input), output)
     }
 
-    func testCommentedOutStringExpression2() {
-        let input = "<Foo text=\" //hello world\"/>"
-        let output = "<Foo text=\"// hello world\"/>\n"
+    func testCommentedOutStringExpressionClause2() {
+        let input = "<Foo text=\"foo { //10-5* 4 }bar\"/>"
+        let output = "<Foo text=\"foo {// 10-5* 4}bar\"/>\n"
         XCTAssertEqual(try format(input), output)
     }
 

@@ -4,7 +4,6 @@ import XCTest
 @testable import Layout
 
 class StateTests: XCTestCase {
-
     struct TestState {
         var foo = 5
         var bar = "baz"
@@ -126,5 +125,30 @@ class StateTests: XCTestCase {
         vc.updated = false
         node.setState(state) // Not changed
         XCTAssertFalse(vc.updated)
+    }
+
+    class OptionalChildModel {
+        var name: String?
+    }
+
+    class OptionalParentModel {
+        var nestedModel: OptionalChildModel?
+    }
+
+    func testStateClass() {
+        let state = OptionalParentModel()
+        state.nestedModel = OptionalChildModel()
+        let label = UILabel()
+        let node = LayoutNode(
+            view: label,
+            state: state,
+            expressions: ["text": "{nestedModel.name}"]
+        )
+        let vc = TestVC()
+        try! node.mount(in: vc)
+        XCTAssertEqual(label.text, "")
+        state.nestedModel?.name = "Foo"
+        node.setState(state)
+        XCTAssertEqual(label.text, "Foo")
     }
 }

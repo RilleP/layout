@@ -1,5 +1,97 @@
 # Change Log
 
+## [0.6.28](https://github.com/schibsted/layout/releases/tag/0.6.28) (2018-07-20)
+
+- Improved support for UIVisualEffectView (see README for details)
+- Improved error messaging for misspelled function names in expressions
+- Fixed spurious 'Unknown property X of UILabel in Y' error message
+- Fixed infinite layout loop bug
+
+## [0.6.27](https://github.com/schibsted/layout/releases/tag/0.6.27) (2018-06-15)
+
+- Fixed all compiler warnings in Xcode 10 beta
+- Added support for new CoreAnimation enum types in iOS 12
+- Added support for iOS 12 UIScrollView.DecelerationRate type
+- Added support for iOS 12 UILabel.enablesMarqueeWhenAncestorFocused property
+- Layout now allows raw values to be used for enum or OptionSet expressions, which helps with backwards compatibility
+
+## [0.6.26](https://github.com/schibsted/layout/releases/tag/0.6.26) (2018-06-07)
+
+- Now supports building with Swift 4.2 in Xcode 10 beta
+- Fixed a layout regression in version 0.6.20 for nested auto-sized views
+- Layout now requires Xcode 9.3 or higher
+
+## [0.6.25](https://github.com/schibsted/layout/releases/tag/0.6.25) (2018-06-06)
+
+- Now supports Swift 3.4 or 4.1.5 in Xcode 10 beta (Swift 4.2 is not yet supported)
+- Fixed a bug where nested `Optional` state properties could not be referenced in expressions
+- Fixed crash when setting `UIButton.attributedTitle` property or using inline HTML
+- Setting `UIButton.attributedTitle` now preserves the `titleColor` and `titleLabel.font`
+- Added support for `accessibilityAttributedLabel`
+
+## [0.6.24](https://github.com/schibsted/layout/releases/tag/0.6.24) (2018-05-09)
+
+- Significantly improved performance for inline HTML and NSAttributedString expressions
+- Added support for inline HTML inside UITableViewCell nodes
+- Added support for nodes containing both body text and subviews
+- Minor breaking changes to the RuntimeType API
+
+## [0.6.23](https://github.com/schibsted/layout/releases/tag/0.6.23) (2018-05-03)
+
+- Added a warning when setting UIView property expressions directly on a UIViewController node
+- Improved right-to-left behavior on iOS 10 and earlier
+- Default leading and trailing expressions are now supported
+- Fixed blank warnings in Layout console when using new layout mode
+- Performance improvements
+
+## [0.6.22](https://github.com/schibsted/layout/releases/tag/0.6.22) (2018-04-27)
+
+- Added a more intuitive behavior for `right` & `bottom` layout expressions (see "Legacy Layout Mode" section in README)
+- Reduced initial setup time for UITableView ans UICollectionView layouts
+- Font expressions can now reference static font properties defined on `UIFont` as named fonts
+
+## [0.6.21](https://github.com/schibsted/layout/releases/tag/0.6.21) (2018-04-05)
+
+- Added `<children/>` tag for specifying insertion point for children inside nested template files (see README for details)
+
+## [0.6.20](https://github.com/schibsted/layout/releases/tag/0.6.20) (2018-04-04)
+
+- Fixed `UITableViewCell` layout bug 
+
+## [0.6.19](https://github.com/schibsted/layout/releases/tag/0.6.19) (2018-04-04)
+
+- Added `leading` and `trailing` layout expressions for handling right-to-left internationalization
+- Added missing `justified` and `natural` values for `NSTextAlignment` properties
+- Fixed duplicate symbols suggestions in Red Box
+- Improved error messaging, especially for invalid static properties
+- Fixed bug where expressions were sometimes incorrectly marked as redundant
+
+## [0.6.18](https://github.com/schibsted/layout/releases/tag/0.6.18) (2018-02-28)
+
+- Fixed spurious error due to the `lineBreakMode` property being unvailable on `UITextView`
+- Updated Expression to 0.12.8, which improves support for custom functions
+- You can now use format arguments with literal string expressions, e.g. `{ `results within %i km`(distance) }`
+
+## [0.6.17](https://github.com/schibsted/layout/releases/tag/0.6.17) (2018-02-23)
+
+- You can now pass custom functions to `LayoutNode` for use in property expressions (see README for details)
+- Updated Expression to 0.12.6, which adds support for inline array literals, string subscripting and more (see README for details)
+- Updated LayoutTool and Layout Xcode Editor Extension to support new Expression features
+- Fixed (almost) all deprecation warnings in Swift 4.1
+
+## [0.6.16](https://github.com/schibsted/layout/releases/tag/0.6.16) (2018-01-29)
+
+- Improved resolution logic when referencing image or color assets in bundles other than the main bundle
+- Fixed top/bottom layout guide not updating correctly on iOS 9 and 10
+- Fixed some edge cases when parsing expression comments and improved test coverage
+- Updated Expression library to version 0.12.0
+
+## [0.6.15](https://github.com/schibsted/layout/releases/tag/0.6.15) (2018-01-19)
+
+- Fixed bug where safe area insets would not be updated correctly in some cases
+- Duplicate instances of the same view or view controller in a LayoutNode hierarchy will now throw an error
+- Duplicate outlet names in a LayoutNode hierarchy will now throw an error
+
 ## [0.6.14](https://github.com/schibsted/layout/releases/tag/0.6.14) (2018-01-11)
 
 - Fixed longstanding bug where reloading failed to remove the old layout views/controllers from the hierarchy
