@@ -713,14 +713,17 @@ public class LayoutNode: NSObject {
         if self.id == id {
             return self
         }
+        if parent != excluding {        
+            if let match = parent?.node(withID: id, excluding: self) {
+                return match;
+            }
+        }
         for child in children where child !== excluding {
             if let match = child.node(withID: id, excluding: self) {
                 return match
             }
         }
-        if parent != excluding {
-            return parent?.node(withID: id, excluding: self)
-        }
+        
         return nil
     }
     
@@ -2535,13 +2538,67 @@ public class LayoutNode: NSObject {
                 try self._view?.setValue(owner, forExpression: name)
             }, for: self)
         }
-        try bindActions()
+        //try bindActions()
+        
+        try bindActionsToAny();
+        /*if !tryBindActions(to: owner) {
+            throw LayoutError("Failed to bind actions", for: self)
+        }*/
+        
         for child in children {
             try LayoutError.wrap({ try child.bind(to: owner) }, for: self)
         }
         try throwUnhandledError()
     }
     
+    private func bindActionsToAny() throws -> Bool {
+        
+        guard let control = _view as? UIControl else {
+            /*if let navigationItem = _viewController?.navigationItem {
+                do {
+                    if let buttonItem = navigationItem.leftBarButtonItem {
+                        try buttonItem.bindAction(for: owner)
+                    }
+                    if let buttonItem = navigationItem.rightBarButtonItem {
+                        try buttonItem.bindAction(for: owner)
+                    }
+                }
+                catch {
+                    return false;
+                }
+                return true;
+            }
+            else {
+                return false;
+            }*/
+            return false;
+        }
+        
+        var o = self;
+        var success = false;
+        
+        while true {
+            if self.tryBindActions(to: o.view, from: control) {
+                success = true;
+                break;
+            }
+            if let parent = o.parent {
+                o = parent;
+            }
+            else {
+                if let owner = _owner, self.tryBindActions(to: owner, from: control) {
+                    success = true;
+                }
+                break;
+            }
+        }
+        
+        if !success {
+            throw LayoutError("Failed to bind actions", for: self)
+        }
+        
+        return success;
+    }
     
     private func tryToBindOutlet(to owner: NSObject, outlet: String) throws -> Bool {
         guard let type = Swift.type(of: owner).allPropertyTypes()[outlet] else {
@@ -2607,7 +2664,10 @@ public class LayoutNode: NSObject {
     }
     
     private func bindActions() throws {
+        try bindActionsToAny();
+        return;
         guard let owner = _owner else { return }
+        
         guard let control = _view as? UIControl else {
             if let navigationItem = _viewController?.navigationItem {
                 if let buttonItem = navigationItem.leftBarButtonItem {
@@ -2628,6 +2688,28 @@ public class LayoutNode: NSObject {
             }
             throw LayoutError(error, for: self)
         }
+    }
+    
+    private func tryBindActions(to owner: NSObject, from control: UIControl) -> Bool {
+        
+        
+        do {
+            
+            try control.bindActions(for: owner)
+            
+        } catch {
+            if let delegate = delegate {
+                do {
+                    try LayoutError.wrap({ try control.bindActions(for: delegate) }, for: self)
+                }
+                catch {
+                    return false;
+                }
+                return true;
+            }
+            return false;
+        }
+        return true;
     }
 }
 

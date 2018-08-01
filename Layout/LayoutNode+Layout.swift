@@ -60,10 +60,13 @@ extension LayoutNode {
             )
             _parameters = layout.parameters
             _macros = layout.macros
+            self.constants = constants;
+        
             rootURL = layout.rootURL
             guard let xmlPath = layout.xmlPath else {
                 return
             }
+            
             var deferredError: Error?
             LayoutLoader().loadLayout(
                 withContentsOfURL: urlFromString(xmlPath, relativeTo: rootURL),

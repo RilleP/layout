@@ -166,6 +166,7 @@
 		ACD6CEF31FD6AFC400E08B8C /* LayoutDidLoad_Valid.xml in Resources */ = {isa = PBXBuildFile; fileRef = ACD6CEF21FD6AFC400E08B8C /* LayoutDidLoad_Valid.xml */; };
 		ACD6CEF51FD6B16F00E08B8C /* LayoutLoading.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0105F7801F0547910067B313 /* LayoutLoading.swift */; };
 		ACD6CEF71FD6C64A00E08B8C /* LayoutDidLoad_Invalid.xml in Resources */ = {isa = PBXBuildFile; fileRef = ACD6CEF61FD6C64A00E08B8C /* LayoutDidLoad_Invalid.xml */; };
+		F9DBA7B720189CA000D8A305 /* LayoutLoadingExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9DBA7B620189CA000D8A305 /* LayoutLoadingExtension.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -430,6 +431,7 @@
 		ACD6CEEF1FD6ABC900E08B8C /* LayoutViewControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayoutViewControllerTests.swift; sourceTree = "<group>"; };
 		ACD6CEF21FD6AFC400E08B8C /* LayoutDidLoad_Valid.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = LayoutDidLoad_Valid.xml; sourceTree = "<group>"; };
 		ACD6CEF61FD6C64A00E08B8C /* LayoutDidLoad_Invalid.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = LayoutDidLoad_Invalid.xml; sourceTree = "<group>"; };
+		F9DBA7B620189CA000D8A305 /* LayoutLoadingExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LayoutLoadingExtension.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -611,6 +613,7 @@
 		011CE69A1F053ABD0034771C /* Layout */ = {
 			isa = PBXGroup;
 			children = (
+				F9DBA7B620189CA000D8A305 /* LayoutLoadingExtension.swift */,
 				013A91AA1FC729090043C543 /* Vendor */,
 				0192A6CD1FA7359100A30FDA /* Shared */,
 				0105F77C1F0547910067B313 /* AnyExpression.swift */,
@@ -1414,6 +1417,7 @@
 				011D73691FB1D218006406F7 /* StringUtils.swift in Sources */,
 				0105F7911F0547910067B313 /* Optional+Layout.swift in Sources */,
 				0105F78A1F0547910067B313 /* LayoutError.swift in Sources */,
+				F9DBA7B720189CA000D8A305 /* LayoutLoadingExtension.swift in Sources */,
 				0192A6D71FA86D5C00A30FDA /* UIFont+Layout.swift in Sources */,
 				01185CCE1F334B0B00D34EA7 /* UIStackView+Layout.swift in Sources */,
 				0105F7901F0547910067B313 /* LayoutViewController.swift in Sources */,

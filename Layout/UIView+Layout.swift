@@ -478,6 +478,7 @@ extension UIControl {
                 assertionFailure()
                 return
             }
+            
             if let actions = self.actions(forTarget: target, forControlEvent: event), actions.contains("\(action)") {
                 // Already bound
             } else {
